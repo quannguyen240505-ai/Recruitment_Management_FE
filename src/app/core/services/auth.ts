@@ -25,4 +25,8 @@ export class Auth {
     localStorage.removeItem(this.accessTokenKey);
     this.isAuthenticated.set(false);
   }
+
+  logout(): void {
+    this.clearSession();
+  }
 }
