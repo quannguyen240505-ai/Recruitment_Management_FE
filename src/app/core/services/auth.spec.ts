@@ -202,4 +202,90 @@ describe('Auth', () => {
         expect(localStorage.getItem('auth_user')).toBeNull();
         expect(auth.isAuthenticated()).toBe(false);
     });
+
+    // TEST 8: Register thành công - HTTP 201
+    it('should register successfully without storing JWT', () => {
+        const registerRequest = {
+            fullName: 'Candidate Test',
+            username: 'candidate_test_119',
+            email: 'candidate119@example.com',
+            phoneNumber: '0912345678',
+            password: 'Test@12345',
+            confirmPassword: 'Test@12345'
+        };
+
+        const mockResponse = {
+            userId: 'user-119',
+            username: 'candidate_test_119',
+            email: 'candidate119@example.com',
+            fullName: 'Candidate Test',
+            role: 'CANDIDATE'
+        };
+
+        let result: typeof mockResponse | undefined;
+
+        auth.register(registerRequest).subscribe(response => {
+            result = response;
+        });
+
+        const request = httpMock.expectOne(
+            `${environment.apiUrl}/auth/register`
+        );
+
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual(registerRequest);
+
+        request.flush(mockResponse, {
+            status: 201,
+            statusText: 'Created'
+        });
+
+        expect(result).toEqual(mockResponse);
+        expect(auth.getAccessToken()).toBeNull();
+        expect(localStorage.getItem('auth_user')).toBeNull();
+        expect(auth.isAuthenticated()).toBe(false);
+    });
+
+    // TEST 9-10: Register trả lỗi HTTP 400 hoặc 409
+    it.each([
+        [400, 'Bad Request'],
+        [409, 'Conflict']
+    ])(
+        'should handle Register HTTP error %i',
+        (status, statusText) => {
+            const registerRequest = {
+                fullName: 'Candidate Test',
+                username: 'candidate_test_119',
+                email: 'candidate119@example.com',
+                phoneNumber: '0912345678',
+                password: 'Test@12345',
+                confirmPassword: 'Test@12345'
+            };
+
+            let receivedStatus: number | null = null;
+
+            auth.register(registerRequest).subscribe({
+                error: error => {
+                    receivedStatus = error.status;
+                }
+            });
+
+            const request = httpMock.expectOne(
+                `${environment.apiUrl}/auth/register`
+            );
+
+            expect(request.request.method).toBe('POST');
+
+            request.flush(
+                { title: 'Registration failed' },
+                { status, statusText }
+            );
+
+            expect(receivedStatus).toBe(status);
+            expect(auth.getAccessToken()).toBeNull();
+            expect(localStorage.getItem('auth_user')).toBeNull();
+            expect(auth.isAuthenticated()).toBe(false);
+        }
+    );
+
 });

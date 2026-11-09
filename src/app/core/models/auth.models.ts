@@ -14,3 +14,20 @@ export interface LoginResponse {
 export interface GoogleLoginRequest {
     idToken: string;
 }
+
+export interface RegisterRequest {
+    fullName: string;
+    username: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export interface RegisterResponse {
+    userId: string;
+    username: string;
+    email: string;
+    fullName: string;
+    role: string;
+}
