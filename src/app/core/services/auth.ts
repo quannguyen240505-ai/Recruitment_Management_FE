@@ -22,7 +22,7 @@ export class Auth {
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(
-        `${environment.apiUrl}/api/auth/login`,
+        `${environment.apiUrl}/auth/login`,
         request
       )
       .pipe(
