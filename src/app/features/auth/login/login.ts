@@ -17,9 +17,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { Auth } from '../../../core/services/auth';
-
 import { environment } from '../../../../environments/environment';
-
 import {
   GoogleCredentialResponse,
   GoogleIdentity
@@ -28,10 +26,7 @@ import {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -45,7 +40,6 @@ export class Login implements AfterViewInit {
   googleButtonHost!: ElementRef<HTMLDivElement>;
 
   isGoogleLoading = false;
-
   isLoading = false;
   errorMessage = '';
   showPassword = false;
@@ -60,6 +54,7 @@ export class Login implements AfterViewInit {
       validators: [Validators.required]
     })
   });
+
   async ngAfterViewInit(): Promise<void> {
     try {
       await this.googleIdentity.renderButton(
@@ -72,17 +67,21 @@ export class Login implements AfterViewInit {
     } catch {
       this.errorMessage =
         'Không thể tải chức năng đăng nhập Google.';
-
       this.cdr.markForCheck();
     }
   }
+
   private handleGoogleCredential(
     response: GoogleCredentialResponse
   ): void {
+    // Prevent duplicate callbacks from sending concurrent Google Login requests.
+    if (this.isGoogleLoading) {
+      return;
+    }
+
     if (!response.credential) {
       this.errorMessage =
         'Không nhận được thông tin xác thực từ Google.';
-
       this.cdr.markForCheck();
       return;
     }
@@ -95,10 +94,8 @@ export class Login implements AfterViewInit {
       next: () => {
         this.isGoogleLoading = false;
         this.cdr.markForCheck();
-
-        this.router.navigate(['/dashboard']);
+        void this.router.navigate(['/dashboard']);
       },
-
       error: (error: HttpErrorResponse) => {
         this.isGoogleLoading = false;
 
@@ -120,6 +117,7 @@ export class Login implements AfterViewInit {
       }
     });
   }
+
   submit(): void {
     if (this.loginForm.invalid || this.isLoading) {
       this.loginForm.markAllAsTouched();
@@ -132,9 +130,8 @@ export class Login implements AfterViewInit {
     this.auth.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        void this.router.navigate(['/dashboard']);
       },
-
       error: (error: HttpErrorResponse) => {
         this.isLoading = false;
 
