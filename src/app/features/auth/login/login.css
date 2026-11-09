@@ -14,29 +14,14 @@ input {
     font: inherit;
 }
 
-/* =========================================================
-   PAGE — Figma: 1440 x 900
-   ========================================================= */
-
 .login-page {
     position: relative;
-
     width: 100%;
     min-width: 100%;
     min-height: 900px;
-
     overflow: hidden;
-
-    background:
-        linear-gradient(135deg,
-            #f8fafc 0%,
-            #ffffff 50%,
-            #eff6ff 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eff6ff 100%);
 }
-
-/* =========================================================
-   DECORATION
-   ========================================================= */
 
 .decor {
     position: absolute;
@@ -47,35 +32,23 @@ input {
 .decor-top {
     width: 300px;
     height: 300px;
-
     top: -30px;
     left: calc(50% + 290px);
-
     background: #eff6ff;
 }
 
 .decor-bottom {
     width: 220px;
     height: 220px;
-
     top: 650px;
     left: calc(50% - 580px);
-
     background: #f5f3ff;
 }
 
-/* =========================================================
-   HEADER
-   Figma:
-   logo x56 y42 36x36
-   ========================================================= */
-
 .page-header {
     position: absolute;
-
     top: 42px;
     left: 56px;
-
     display: flex;
     align-items: flex-start;
 }
@@ -83,16 +56,12 @@ input {
 .brand-logo {
     width: 36px;
     height: 36px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 10px;
-
     background: #0b1220;
     color: #ffffff;
-
     font-size: 15px;
     line-height: 18px;
     font-weight: 700;
@@ -104,9 +73,7 @@ input {
 
 .brand-name {
     height: 19px;
-
     color: #0b1220;
-
     font-size: 16px;
     line-height: 19px;
     font-weight: 700;
@@ -114,9 +81,7 @@ input {
 
 .brand-subtitle {
     margin-top: 5px;
-
     color: #6b7280;
-
     font-size: 10px;
     line-height: 12px;
     font-weight: 400;
@@ -124,59 +89,33 @@ input {
 
 .copyright {
     position: absolute;
-
     top: 53px;
     right: 56px;
-
     color: #6b7280;
-
     font-size: 11px;
     line-height: 13px;
     font-weight: 400;
 }
 
-/* =========================================================
-   LOGIN CARD
-   Figma:
-   x470 y118
-   width 500
-   height 664
-   radius 20
-   ========================================================= */
-
 .login-card {
     position: absolute;
-
     top: 118px;
     left: 50%;
     transform: translateX(-50%);
-
     width: 500px;
     height: 664px;
-
     border-radius: 20px;
-
     background: #ffffff;
 }
 
-/* =========================================================
-   TITLE
-   ========================================================= */
-
 .login-card h1 {
     position: absolute;
-
     top: 26px;
     left: 0;
-
     width: 100%;
-
     margin: 0;
-
     color: #111827;
-
     text-align: center;
-
     font-size: 30px;
     line-height: 36px;
     font-weight: 700;
@@ -184,160 +123,87 @@ input {
 
 .welcome-text {
     position: absolute;
-
     top: 73px;
     left: 0;
-
     width: 100%;
-
     margin: 0;
-
     color: #6b7280;
-
     text-align: center;
-
     font-size: 14px;
     line-height: 17px;
     font-weight: 400;
 }
 
-/* =========================================================
-   GOOGLE BUTTON
-   Figma x520 y244 400x48
-   Relative card x50 y126
-   ========================================================= */
-
-.google-button {
+/* Google Identity Services button host */
+.google-button-wrapper {
     position: absolute;
-
     top: 126px;
-    left: 50px;
-
-    width: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 100px);
+    max-width: 400px;
     height: 48px;
-
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
+}
 
-    padding: 0;
+.google-button-host {
+    width: 100%;
+    max-width: 400px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
 
+.google-button-host>div {
+    max-width: 100% !important;
+}
+
+.google-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.96);
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-
-    background: #ffffff;
-    color: #111827;
-
+    color: #64748b;
     font-size: 14px;
-    line-height: 17px;
-    font-weight: 700;
-
-    cursor: pointer;
+    font-weight: 500;
+    z-index: 3;
 }
-
-.google-button:hover {
-    background: #fafafa;
-}
-
-/* Figma Google mark: 20 x 20 */
-
-.google-mark {
-    position: relative;
-
-    width: 20px;
-    height: 20px;
-
-    margin-right: 94px;
-}
-
-.google-g {
-    position: absolute;
-
-    left: 4.5px;
-    top: 1px;
-
-    color: #4285f4;
-
-    font-size: 14px;
-    line-height: 17px;
-    font-weight: 700;
-}
-
-.google-red,
-.google-green,
-.google-yellow {
-    position: absolute;
-
-    width: 4.8px;
-    height: 4.8px;
-}
-
-.google-red {
-    top: 0.6px;
-    right: -0.4px;
-
-    background: #ea4335;
-}
-
-.google-green {
-    right: -0.4px;
-    bottom: 0.6px;
-
-    background: #34a853;
-}
-
-.google-yellow {
-    left: -0.4px;
-    bottom: 0.6px;
-
-    background: #fbbc05;
-}
-
-/*
- * Text trong Figma nằm độc lập ở tâm.
- * Dùng margin âm để giữ đúng vị trí icon/text.
- */
-
-.google-button>span:last-child {
-    margin-left: -74px;
-}
-
-/* =========================================================
-   DIVIDER
-   ========================================================= */
 
 .divider {
     position: absolute;
-
     top: 198px;
-    left: 50px;
-
-    width: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 100px);
+    max-width: 400px;
     height: 16px;
-
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 20px;
 }
 
 .divider span {
-    width: 150px;
+    flex: 1;
     height: 1px;
-
     background: #e5e7eb;
 }
 
 .divider small {
     color: #6b7280;
-
     font-size: 12px;
     line-height: 15px;
     font-weight: 400;
 }
-
-/* =========================================================
-   FORM
-   ========================================================= */
 
 .login-form {
     margin: 0;
@@ -345,10 +211,10 @@ input {
 
 .field {
     position: absolute;
-
-    left: 50px;
-
-    width: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 100px);
+    max-width: 400px;
 }
 
 .email-field {
@@ -356,35 +222,27 @@ input {
 }
 
 .password-field {
-    top: 340px !important;
+    top: 344px;
 }
 
 .field label {
     display: block;
-
     margin-bottom: 9px;
-
     color: #111827;
-
     font-size: 12px;
     line-height: 15px;
     font-weight: 700;
 }
 
 .field input {
-    width: 400px;
+    width: 100%;
     height: 48px;
-
     padding: 0 13px;
-
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-
     outline: none;
-
     background: #ffffff;
     color: #111827;
-
     font-size: 13px;
     line-height: 16px;
     font-weight: 400;
@@ -397,14 +255,12 @@ input {
 
 .field input:focus {
     border-color: #2563eb;
-
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 }
 
 .password-wrapper {
     position: relative;
-
-    width: 400px;
+    width: 100%;
     height: 48px;
 }
 
@@ -414,54 +270,38 @@ input {
 
 .password-toggle {
     position: absolute;
-
     top: 0;
     right: 0;
-
     width: 48px;
     height: 48px;
-
     border: 0;
-
     background: transparent;
     color: #6b7280;
-
     font-size: 12px;
     font-weight: 700;
-
     cursor: pointer;
 }
 
 .field-error {
     position: absolute;
-
-    top: 65px;
-    left: 2px;
-
+    top: 74px;
+    left: 4px;
+    margin: 0;
     color: #dc2626;
-
     font-size: 10px;
     line-height: 12px;
     font-weight: 400;
-
     white-space: nowrap;
 }
 
-/* =========================================================
-   REMEMBER / FORGOT
-   Figma y548
-   Relative y430
-   ========================================================= */
-
 .form-options {
     position: absolute;
-
-    top: 440px !important;
-    left: 50px;
-
-    width: 400px;
+    top: 458px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 100px);
+    max-width: 400px;
     height: 15px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -470,79 +310,56 @@ input {
 .remember {
     display: flex;
     align-items: center;
-
     color: #6b7280;
-
     font-size: 12px;
     line-height: 15px;
     font-weight: 400;
-
     cursor: pointer;
 }
 
 .remember input {
     width: 13px;
     height: 13px;
-
     margin: 0 6px 0 0;
-
     accent-color: #2563eb;
 }
 
 .forgot-password {
     color: #2563eb;
-
     text-decoration: none;
-
     font-size: 12px;
     line-height: 15px;
     font-weight: 700;
 }
 
-/* =========================================================
-   LOGIN ERROR
-   ========================================================= */
-
 .login-error {
     position: absolute;
-
-    top: 458px;
-    left: 50px;
-
-    width: 400px;
-
+    top: 478px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 100px);
+    max-width: 400px;
     color: #dc2626;
-
     text-align: center;
-
     font-size: 11px;
     line-height: 14px;
 }
 
-/* =========================================================
-   LOGIN BUTTON
-   Figma 400 x 46
-   ========================================================= */
-
 .login-button {
     position: absolute;
-
-    top: 478px !important;
-    left: 50px;
-
-    width: 400px;
+    top: 496px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 100px);
+    max-width: 400px;
     height: 46px;
-
     border: 0;
     border-radius: 10px;
-
     background: #2563eb;
     color: #ffffff;
-
     font-size: 14px;
     line-height: 17px;
     font-weight: 700;
-
     cursor: pointer;
 }
 
@@ -555,24 +372,16 @@ input {
     opacity: 0.7;
 }
 
-/* =========================================================
-   REGISTER
-   ========================================================= */
-
 .register-area {
     position: absolute;
-
-    top: 540px;
+    top: 560px;
     left: 0;
-
     width: 100%;
-
     text-align: center;
 }
 
 .register-area div {
     color: #6b7280;
-
     font-size: 13px;
     line-height: 16px;
     font-weight: 400;
@@ -580,29 +389,21 @@ input {
 
 .register-area a {
     display: inline-block;
-
     margin-top: 12px;
-
     color: #2563eb;
-
     text-decoration: none;
-
     font-size: 13px;
     line-height: 16px;
     font-weight: 700;
 }
 
-/* =========================================================
-   SMALL SCREEN
-   Giữ nguyên tỷ lệ Figma nhưng không vỡ màn hình
-   ========================================================= */
-
 @media (max-width: 600px) {
     .login-page {
-        min-height: 100vh;
+        min-height: 820px;
     }
 
     .page-header {
+        top: 24px;
         left: 24px;
     }
 
@@ -610,128 +411,43 @@ input {
         display: none;
     }
 
-    .login-card {
-        top: 110px;
+    .decor-top {
+        width: 220px;
+        height: 220px;
+        top: -60px;
+        left: 55%;
+    }
 
+    .decor-bottom {
+        width: 160px;
+        height: 160px;
+        top: 680px;
+        left: -50px;
+    }
+
+    .login-card {
+        top: 92px;
         width: calc(100% - 32px);
         max-width: 500px;
     }
 
     .google-button-wrapper,
-    .google-button-host,
     .divider,
     .field,
-    .password-wrapper,
-    .field input,
     .form-options,
-    .login-button,
-    .login-error {
-        width: calc(100% - 100px);
+    .login-error,
+    .login-button {
+        width: calc(100% - 48px);
+        max-width: 400px;
     }
 
-    .divider,
-    .field,
-    .password-wrapper,
-    .field input,
-    .form-options,
-    .login-button,
-    .login-error {
-        width: calc(100% - 100px);
+    .google-button-host {
+        width: 100%;
+        max-width: 100%;
     }
 
-    .divider span {
-        width: 36%;
+    .field-error {
+        white-space: normal;
+        max-width: 100%;
     }
-}
-
-.google-button-wrapper {
-    position: absolute;
-
-    top: 126px;
-    left: 50px;
-
-    width: 400px;
-    height: 48px;
-
-    margin: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    z-index: 2;
-}
-
-.google-button-host {
-    width: 400px;
-    height: 44px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.google-loading {
-    position: absolute;
-    inset: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 500;
-
-    z-index: 3;
-}
-
-/* ===== VALIDATION ALIGN FIX ===== */
-
-/* ===== VALIDATION ALIGN FIX ===== */
-
-.email-field {
-    top: 234px !important;
-}
-
-.password-field {
-    top: 344px !important;
-}
-
-/* Dòng lỗi cách input xuống một chút */
-.field-error {
-    position: absolute !important;
-
-    top: 74px !important;
-    left: 4px !important;
-
-    margin: 0 !important;
-
-    color: #dc2626;
-    font-size: 10px;
-    line-height: 12px;
-    font-weight: 400;
-
-    white-space: nowrap;
-}
-
-/* Đẩy các thành phần phía dưới password xuống */
-.form-options {
-    top: 458px !important;
-}
-
-.login-error {
-    top: 478px !important;
-}
-
-.login-button {
-    top: 496px !important;
-}
-
-.register-area {
-    top: 560px !important;
 }

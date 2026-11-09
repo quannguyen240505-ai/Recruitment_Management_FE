@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 
 export interface GoogleCredentialResponse {
@@ -43,47 +44,29 @@ declare global {
 export class GoogleIdentity {
     private scriptPromise?: Promise<void>;
 
+    /**
+     * Load Google Identity Services SDK.
+     * Reuse the pending request and allow retry after failure.
+     */
     load(): Promise<void> {
+        // SDK đã tải thành công
         if (window.google?.accounts?.id) {
             return Promise.resolve();
         }
 
+        // Tránh tải SDK nhiều lần cùng lúc
         if (this.scriptPromise) {
             return this.scriptPromise;
         }
 
-        this.scriptPromise = new Promise<void>((resolve, reject) => {
-            const existingScript =
-                document.getElementById(
-                    'google-identity-services'
-                ) as HTMLScriptElement | null;
+        const loadPromise = new Promise<void>((resolve, reject) => {
+            const existingScript = document.getElementById(
+                'google-identity-services'
+            ) as HTMLScriptElement | null;
 
-            const verifyLoaded = () => {
-                if (window.google?.accounts?.id) {
-                    resolve();
-                } else {
-                    reject(
-                        new Error('Google Identity Services không tải được.')
-                    );
-                }
-            };
-
+            // Xóa script cũ khi SDK chưa sẵn sàng
             if (existingScript) {
-                existingScript.addEventListener(
-                    'load',
-                    verifyLoaded,
-                    { once: true }
-                );
-
-                existingScript.addEventListener(
-                    'error',
-                    () => reject(
-                        new Error('Không thể tải Google Identity Services.')
-                    ),
-                    { once: true }
-                );
-
-                return;
+                existingScript.remove();
             }
 
             const script = document.createElement('script');
@@ -93,20 +76,46 @@ export class GoogleIdentity {
             script.async = true;
             script.defer = true;
 
-            script.onload = verifyLoaded;
+            script.onload = () => {
+                if (window.google?.accounts?.id) {
+                    resolve();
+                } else {
+                    reject(
+                        new Error(
+                            'Google Identity Services không tải được.'
+                        )
+                    );
+                }
+            };
 
             script.onerror = () => {
                 reject(
-                    new Error('Không thể tải Google Identity Services.')
+                    new Error(
+                        'Không thể tải Google Identity Services.'
+                    )
                 );
             };
 
             document.head.appendChild(script);
         });
 
+        this.scriptPromise = loadPromise.catch(error => {
+            // Reset Promise để lần sau có thể retry
+            this.scriptPromise = undefined;
+
+            document.getElementById(
+                'google-identity-services'
+            )?.remove();
+
+            throw error;
+        });
+
         return this.scriptPromise;
     }
 
+    /**
+     * Initialize Google Sign-In and render responsive button.
+     */
     async renderButton(
         element: HTMLElement,
         clientId: string,
@@ -114,7 +123,7 @@ export class GoogleIdentity {
     ): Promise<void> {
         await this.load();
 
-        const googleId = window.google?.accounts.id;
+        const googleId = window.google?.accounts?.id;
 
         if (!googleId) {
             throw new Error(
@@ -122,12 +131,34 @@ export class GoogleIdentity {
             );
         }
 
+        // Kiểm tra cấu hình Google Client ID
+        if (!clientId.trim()) {
+            throw new Error(
+                'Google Client ID chưa được cấu hình.'
+            );
+        }
+
+        // Lấy chiều rộng thực tế của vùng chứa
+        const hostWidth = element.clientWidth;
+
+        // Giới hạn Google button trong khoảng 200–400px
+        // Nếu không đo được kích thước, dùng 400px
+        const buttonWidth = Math.max(
+            200,
+            Math.min(400, hostWidth || 400)
+        );
+
+        // Xóa nút cũ nếu cần render lại
+        element.replaceChildren();
+
+        // Khởi tạo Google Sign-In
         googleId.initialize({
             client_id: clientId,
             callback,
             ux_mode: 'popup'
         });
 
+        // Render nút Google theo kích thước vùng chứa
         googleId.renderButton(element, {
             type: 'standard',
             theme: 'outline',
@@ -135,7 +166,7 @@ export class GoogleIdentity {
             text: 'signin_with',
             shape: 'rectangular',
             logo_alignment: 'left',
-            width: 400,
+            width: buttonWidth,
             locale: 'vi'
         });
     }
