@@ -11,3 +11,6 @@ export interface LoginResponse {
     username: string;
     role: string;
 }
+export interface GoogleLoginRequest {
+    idToken: string;
+}

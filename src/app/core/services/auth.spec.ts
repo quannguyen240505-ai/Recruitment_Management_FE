@@ -32,7 +32,7 @@ describe('Auth', () => {
         localStorage.clear();
     });
 
-    // TEST 1: Lưu JWT vào localStorage
+    // TEST 1: Lưu JWT
     it('should store access token', () => {
         auth.setAccessToken('test-token');
 
@@ -40,23 +40,22 @@ describe('Auth', () => {
         expect(auth.isAuthenticated()).toBe(true);
     });
 
-    // TEST 2: Xóa thông tin phiên khi đăng xuất
+    // TEST 2: Logout
     it('should remove access token when logout', () => {
         auth.setAccessToken('test-token');
-
         auth.logout();
 
         expect(auth.getAccessToken()).toBeNull();
         expect(auth.isAuthenticated()).toBe(false);
     });
 
-    // TEST 3: Không có token thì chưa đăng nhập
+    // TEST 3: Chưa đăng nhập
     it('should report unauthenticated when token does not exist', () => {
         expect(auth.hasAccessToken()).toBe(false);
         expect(auth.isAuthenticated()).toBe(false);
     });
 
-    // TEST 4: Đăng nhập thành công qua API
+    // TEST 4: Login thường thành công
     it('should login successfully and store JWT and user information', () => {
         const loginRequest = {
             username: 'thien_test_02',
@@ -88,11 +87,7 @@ describe('Auth', () => {
         request.flush(mockResponse);
 
         expect(result).toEqual(mockResponse);
-
-        expect(auth.getAccessToken()).toBe(
-            'jwt-from-backend'
-        );
-
+        expect(auth.getAccessToken()).toBe('jwt-from-backend');
         expect(auth.isAuthenticated()).toBe(true);
 
         expect(
@@ -104,16 +99,14 @@ describe('Auth', () => {
         });
     });
 
-    // TEST 5: Sai tài khoản/mật khẩu không lưu JWT
+    // TEST 5: Login thường thất bại
     it('should not store JWT when login fails with 401', () => {
-        const loginRequest = {
-            username: 'wrong-user',
-            password: 'wrong-password'
-        };
-
         let errorStatus = 0;
 
-        auth.login(loginRequest).subscribe({
+        auth.login({
+            username: 'wrong-user',
+            password: 'wrong-password'
+        }).subscribe({
             error: error => {
                 errorStatus = error.status;
             }
@@ -134,6 +127,77 @@ describe('Auth', () => {
         );
 
         expect(errorStatus).toBe(401);
+        expect(auth.getAccessToken()).toBeNull();
+        expect(localStorage.getItem('auth_user')).toBeNull();
+        expect(auth.isAuthenticated()).toBe(false);
+    });
+
+    // TEST 6: Google Login thành công
+    it('should send Google ID Token and store JWT and user information', () => {
+        const mockResponse = {
+            accessToken: 'google-jwt-from-backend',
+            tokenType: 'Bearer',
+            expiresAtUtc: '2026-11-09T10:00:00Z',
+            userId: 'google-user-123',
+            username: 'google-user',
+            role: 'CANDIDATE'
+        };
+
+        let result: typeof mockResponse | undefined;
+
+        auth.googleLogin('google-id-token').subscribe(response => {
+            result = response;
+        });
+
+        const request = httpMock.expectOne(
+            `${environment.apiUrl}/auth/google-login`
+        );
+
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({
+            idToken: 'google-id-token'
+        });
+
+        request.flush(mockResponse);
+
+        expect(result).toEqual(mockResponse);
+        expect(auth.getAccessToken()).toBe(
+            'google-jwt-from-backend'
+        );
+        expect(auth.isAuthenticated()).toBe(true);
+
+        expect(
+            JSON.parse(localStorage.getItem('auth_user')!)
+        ).toEqual({
+            userId: 'google-user-123',
+            username: 'google-user',
+            role: 'CANDIDATE'
+        });
+    });
+
+    // TEST 7: Google Login thất bại
+    it('should not store JWT when Google Login fails', () => {
+        let errorStatus = 0;
+
+        auth.googleLogin('invalid-token').subscribe({
+            error: error => {
+                errorStatus = error.status;
+            }
+        });
+
+        const request = httpMock.expectOne(
+            `${environment.apiUrl}/auth/google-login`
+        );
+
+        request.flush(
+            { message: 'Google account conflict' },
+            {
+                status: 409,
+                statusText: 'Conflict'
+            }
+        );
+
+        expect(errorStatus).toBe(409);
         expect(auth.getAccessToken()).toBeNull();
         expect(localStorage.getItem('auth_user')).toBeNull();
         expect(auth.isAuthenticated()).toBe(false);

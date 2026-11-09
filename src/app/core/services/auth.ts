@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  GoogleLoginRequest,
   LoginRequest,
   LoginResponse
 } from '../models/auth.models';
@@ -23,6 +24,31 @@ export class Auth {
     return this.http
       .post<LoginResponse>(
         `${environment.apiUrl}/auth/login`,
+        request
+      )
+      .pipe(
+        tap(response => {
+          this.setAccessToken(response.accessToken);
+
+          localStorage.setItem(
+            this.userKey,
+            JSON.stringify({
+              userId: response.userId,
+              username: response.username,
+              role: response.role
+            })
+          );
+        })
+      );
+  }
+  googleLogin(idToken: string): Observable<LoginResponse> {
+    const request: GoogleLoginRequest = {
+      idToken
+    };
+
+    return this.http
+      .post<LoginResponse>(
+        `${environment.apiUrl}/auth/google-login`,
         request
       )
       .pipe(
