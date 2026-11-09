@@ -24,17 +24,16 @@
         </p>
 
         <!-- Google -->
-        <button class="google-button" type="button">
-            <span class="google-mark" aria-hidden="true">
-                <span class="google-g">G</span>
-                <span class="google-red"></span>
-                <span class="google-green"></span>
-                <span class="google-yellow"></span>
-            </span>
+        <div class="google-button-wrapper">
+            <div #googleButtonHost class="google-button-host">
+            </div>
 
-            <span>Đăng nhập bằng Google</span>
-        </button>
-
+            @if (isGoogleLoading) {
+            <div class="google-loading">
+                Đang xác thực Google...
+            </div>
+            }
+        </div>
         <!-- Divider -->
         <div class="divider">
             <span></span>
@@ -45,9 +44,9 @@
         <!-- Login form -->
         <form [formGroup]="loginForm" (ngSubmit)="submit()" class="login-form">
             <div class="field email-field">
-                <label for="username">Email</label>
+                <label for="username">Tên đăng nhập</label>
 
-                <input id="username" type="text" formControlName="username" placeholder="name@company.com"
+                <input id="username" type="text" formControlName="username" placeholder="Nhập tên đăng nhập"
                     autocomplete="username" />
 
                 @if (
