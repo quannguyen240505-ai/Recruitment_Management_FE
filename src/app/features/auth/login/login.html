@@ -45,9 +45,9 @@
         <!-- Login form -->
         <form [formGroup]="loginForm" (ngSubmit)="submit()" class="login-form">
             <div class="field email-field">
-                <label for="username">Email</label>
+                <label for="username">Tên đăng nhập</label>
 
-                <input id="username" type="text" formControlName="username" placeholder="name@company.com"
+                <input id="username" type="text" formControlName="username" placeholder="Nhập tên đăng nhập"
                     autocomplete="username" />
 
                 @if (
