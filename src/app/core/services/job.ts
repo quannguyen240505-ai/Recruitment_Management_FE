@@ -1,9 +1,24 @@
-import { HttpClient } from '@angular/common/http';
+
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
 import { environment } from '../../../environments/environment';
 
-export type JobType = 'FULL_TIME' | 'PART_TIME' | 'INTERNSHIP' | 'CONTRACT' | 'FREELANCE';
+// =====================================================
+// SHARED TYPES
+// =====================================================
+
+export type JobType =
+  | 'FULL_TIME'
+  | 'PART_TIME'
+  | 'INTERNSHIP'
+  | 'CONTRACT'
+  | 'FREELANCE';
+
+// =====================================================
+// SCRUM-138 - CREATE JOB
+// =====================================================
 
 export interface CreateJobRequest {
   title: string;
@@ -27,6 +42,10 @@ export interface CreateJobResponse {
   createdAt: string;
 }
 
+// =====================================================
+// SCRUM-147 - JOB DETAILS
+// =====================================================
+
 export interface JobDetailResponse {
   jobId: string;
   title: string;
@@ -41,20 +60,184 @@ export interface JobDetailResponse {
   deadline: string;
   status: string;
   createdAt: string;
-  company: { companyId: string; name: string; website: string | null; address: string | null };
-  skills: { skillId: string; name: string }[];
+
+  company: {
+    companyId: string;
+    name: string;
+    website: string | null;
+    address: string | null;
+  };
+
+  skills: {
+    skillId: string;
+    name: string;
+  }[];
 }
 
-@Injectable({ providedIn: 'root' })
-export class JobService {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/Jobs`;
+// =====================================================
+// SCRUM-144 - SEARCH & FILTER JOBS
+// =====================================================
 
-  createJob(body: CreateJobRequest): Observable<CreateJobResponse> {
-    return this.http.post<CreateJobResponse>(this.apiUrl, body);
+export interface SearchJobsFilters {
+  keyword?: string;
+  location?: string;
+  jobType?: JobType;
+  experience?: string;
+  salaryMin?: number;
+  skillId?: string;
+  categoryId?: string;
+  companyId?: string;
+
+  // Search API starts paging at 0
+  page?: number;
+  size?: number;
+}
+
+export interface SearchJobItem {
+  jobId: string;
+  title: string;
+  companyId: string;
+  companyName: string;
+  categoryId: string;
+  location: string;
+  jobType: string;
+  experience: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  deadline: string;
+  createdAt: string;
+}
+
+export interface SearchJobsResponse {
+  items: SearchJobItem[];
+  page: number;
+  size: number;
+  totalItems: number;
+}
+
+// =====================================================
+// JOB SERVICE
+// =====================================================
+
+@Injectable({
+  providedIn: 'root'
+})
+export class JobService {
+
+  private readonly http = inject(HttpClient);
+
+  private readonly apiUrl =
+    `${environment.apiUrl}/Jobs`;
+
+  // -------------------------------------------------
+  // SCRUM-138 - CREATE JOB
+  // POST /api/Jobs
+  // -------------------------------------------------
+
+  createJob(
+    body: CreateJobRequest
+  ): Observable<CreateJobResponse> {
+
+    return this.http.post<CreateJobResponse>(
+      this.apiUrl,
+      body
+    );
   }
 
-  getJobDetail(jobId: string): Observable<JobDetailResponse> {
-    return this.http.get<JobDetailResponse>(`${this.apiUrl}/${encodeURIComponent(jobId)}`);
+  // -------------------------------------------------
+  // SCRUM-147 - GET JOB DETAILS
+  // GET /api/Jobs/{jobId}
+  // -------------------------------------------------
+
+  getJobDetail(
+    jobId: string
+  ): Observable<JobDetailResponse> {
+
+    return this.http.get<JobDetailResponse>(
+      `${this.apiUrl}/${encodeURIComponent(jobId)}`
+    );
+  }
+
+  // -------------------------------------------------
+  // SCRUM-144 - SEARCH & FILTER JOBS
+  // GET /api/Jobs
+  // -------------------------------------------------
+
+  searchJobs(
+    filters: SearchJobsFilters = {}
+  ): Observable<SearchJobsResponse> {
+
+    let params = new HttpParams()
+      .set('page', String(filters.page ?? 0))
+      .set('size', String(filters.size ?? 10));
+
+    // Keyword
+    if (filters.keyword?.trim()) {
+      params = params.set(
+        'keyword',
+        filters.keyword.trim()
+      );
+    }
+
+    // Location
+    if (filters.location?.trim()) {
+      params = params.set(
+        'location',
+        filters.location.trim()
+      );
+    }
+
+    // Job type
+    if (filters.jobType) {
+      params = params.set(
+        'jobType',
+        filters.jobType
+      );
+    }
+
+    // Experience
+    if (filters.experience?.trim()) {
+      params = params.set(
+        'experience',
+        filters.experience.trim()
+      );
+    }
+
+    // Minimum salary
+    if (filters.salaryMin != null) {
+      params = params.set(
+        'salaryMin',
+        String(filters.salaryMin)
+      );
+    }
+
+    // Skill
+    if (filters.skillId?.trim()) {
+      params = params.set(
+        'skillId',
+        filters.skillId.trim()
+      );
+    }
+
+    // Category
+    if (filters.categoryId?.trim()) {
+      params = params.set(
+        'categoryId',
+        filters.categoryId.trim()
+      );
+    }
+
+    // Company
+    if (filters.companyId?.trim()) {
+      params = params.set(
+        'companyId',
+        filters.companyId.trim()
+      );
+    }
+
+    return this.http.get<SearchJobsResponse>(
+      this.apiUrl,
+      { params }
+    );
   }
 }
