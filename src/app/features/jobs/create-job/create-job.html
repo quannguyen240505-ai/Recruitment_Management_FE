@@ -32,13 +32,15 @@
             <div class="form-grid">
               <div class="field full-width">
                 <label for="job-title">Chức danh công việc <span class="required">*</span></label>
-                <input id="job-title" formControlName="title" type="text" placeholder="Nhập chức danh công việc" [class.field-invalid]="invalid('title')" />
+                <input id="job-title" formControlName="title" type="text" placeholder="Nhập chức danh công việc"
+                  [class.field-invalid]="invalid('title')" />
                 @if (invalid('title')) { <small class="field-error">Vui lòng nhập chức danh.</small> }
               </div>
 
               <div class="field">
                 <label for="category">Phòng ban / Danh mục <span class="required">*</span></label>
-                <input id="category" formControlName="categoryId" type="text" placeholder="Nhập Category ID hợp lệ" [class.field-invalid]="invalid('categoryId')" />
+                <input id="category" formControlName="categoryId" type="text" placeholder="Nhập Category ID hợp lệ"
+                  [class.field-invalid]="invalid('categoryId')" />
                 <small>Đang dùng ID tạm, chờ API danh mục.</small>
               </div>
               <div class="field">
@@ -51,44 +53,56 @@
 
               <div class="field">
                 <label for="location">Địa điểm <span class="required">*</span></label>
-                <input id="location" formControlName="location" type="text" placeholder="Ví dụ: Hà Nội" [class.field-invalid]="invalid('location')" />
+                <input id="location" formControlName="location" type="text" placeholder="Ví dụ: Hà Nội"
+                  [class.field-invalid]="invalid('location')" />
               </div>
               <div class="field">
                 <label for="experience">Kinh nghiệm <span class="required">*</span></label>
-                <input id="experience" formControlName="experience" type="text" placeholder="Ví dụ: 1–2 năm" [class.field-invalid]="invalid('experience')" />
+                <input id="experience" formControlName="experience" type="text" placeholder="Ví dụ: 1–2 năm"
+                  [class.field-invalid]="invalid('experience')" />
               </div>
 
               <div class="field">
                 <label for="salary-min">Lương tối thiểu (VNĐ)</label>
-                <input id="salary-min" formControlName="salaryMin" type="number" min="0" placeholder="Thỏa thuận" [class.field-invalid]="invalid('salaryMin')" />
+                <input id="salary-min" formControlName="salaryMin" type="number" min="0" placeholder="Thỏa thuận"
+                  [class.field-invalid]="invalid('salaryMin')" />
               </div>
               <div class="field">
                 <label for="salary-max">Lương tối đa (VNĐ)</label>
-                <input id="salary-max" formControlName="salaryMax" type="number" min="0" placeholder="Thỏa thuận" [class.field-invalid]="invalid('salaryMax')" />
+                <input id="salary-max" formControlName="salaryMax" type="number" min="0" placeholder="Thỏa thuận"
+                  [class.field-invalid]="invalid('salaryMax')" />
               </div>
 
               <div class="field">
                 <label for="number-of-positions">Số lượng tuyển <span class="required">*</span></label>
-                <input id="number-of-positions" formControlName="numberOfPositions" type="number" min="1" [class.field-invalid]="invalid('numberOfPositions')" />
+                <input id="number-of-positions" formControlName="numberOfPositions" type="number" min="1" step="1"
+                  [class.field-invalid]="invalid('numberOfPositions')" />
               </div>
               <div class="field">
                 <label for="deadline">Hạn nộp hồ sơ <span class="required">*</span></label>
-                <input id="deadline" formControlName="deadline" type="date" [min]="minDeadline" [class.field-invalid]="invalid('deadline')" />
+                <input id="deadline" formControlName="deadline" type="date" [min]="minDeadline"
+                  [class.field-invalid]="invalid('deadline')" />
               </div>
 
               <div class="field full-width">
                 <label for="skill-ids">Kỹ năng yêu cầu <span class="required">*</span></label>
-                <input id="skill-ids" formControlName="skillIdsText" type="text" placeholder="Nhập Skill ID hợp lệ, cách nhau bằng dấu phẩy" [class.field-invalid]="invalid('skillIdsText')" />
+                <input id="skill-ids" formControlName="skillIdsText" type="text"
+                  placeholder="Nhập Skill ID hợp lệ, cách nhau bằng dấu phẩy"
+                  [class.field-invalid]="invalid('skillIdsText')" />
                 <small>Ví dụ: ID kỹ năng 1, ID kỹ năng 2. Sẽ đổi thành chọn nhiều khi có API Skills.</small>
               </div>
 
               <div class="field full-width">
                 <label for="description">Mô tả công việc <span class="required">*</span></label>
-                <textarea id="description" formControlName="description" rows="5" placeholder="Nhập mô tả, trách nhiệm và quyền lợi..." [class.field-invalid]="invalid('description')"></textarea>
+                <textarea id="description" formControlName="description" rows="5"
+                  placeholder="Nhập mô tả, trách nhiệm và quyền lợi..."
+                  [class.field-invalid]="invalid('description')"></textarea>
               </div>
               <div class="field full-width">
                 <label for="requirements">Yêu cầu ứng viên <span class="required">*</span></label>
-                <textarea id="requirements" formControlName="requirements" rows="5" placeholder="Nhập kỹ năng, kinh nghiệm và yêu cầu ứng viên..." [class.field-invalid]="invalid('requirements')"></textarea>
+                <textarea id="requirements" formControlName="requirements" rows="5"
+                  placeholder="Nhập kỹ năng, kinh nghiệm và yêu cầu ứng viên..."
+                  [class.field-invalid]="invalid('requirements')"></textarea>
               </div>
             </div>
 
@@ -97,10 +111,13 @@
 
             <div class="form-actions">
               @if (hasDraft()) {
-                <button class="btn btn-link" type="button" (click)="restoreDraft()" [disabled]="loading()">Khôi phục nháp</button>
+              <button class="btn btn-link" type="button" (click)="restoreDraft()" [disabled]="loading()">Khôi phục
+                nháp</button>
               }
-              <button class="btn btn-outline" type="button" (click)="saveDraft()" [disabled]="loading()">Lưu nháp</button>
-              <button class="btn btn-primary" type="submit" [disabled]="loading()">{{ loading() ? 'Đang đăng tuyển...' : 'Đăng tuyển' }}</button>
+              <button class="btn btn-outline" type="button" (click)="saveDraft()" [disabled]="loading()">Lưu
+                nháp</button>
+              <button class="btn btn-primary" type="submit" [disabled]="loading()">{{ loading() ? 'Đang đăng tuyển...' :
+                'Đăng tuyển' }}</button>
             </div>
           </form>
         </section>

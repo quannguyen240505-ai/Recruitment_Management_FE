@@ -40,7 +40,11 @@ export class CreateJob {
     jobType: this.fb.nonNullable.control<JobType | ''>('', [Validators.required]),
     location: this.fb.nonNullable.control('', [Validators.required]),
     experience: this.fb.nonNullable.control('', [Validators.required]),
-    numberOfPositions: this.fb.nonNullable.control(1, [Validators.required, Validators.min(1)]),
+    numberOfPositions: this.fb.nonNullable.control(1, [
+      Validators.required,
+      Validators.min(1),
+      Validators.pattern(/^\d+$/)
+    ]),
     salaryMin: this.fb.control<number | null>(null, [Validators.min(0)]),
     salaryMax: this.fb.control<number | null>(null, [Validators.min(0)]),
     deadline: this.fb.nonNullable.control('', [Validators.required]),

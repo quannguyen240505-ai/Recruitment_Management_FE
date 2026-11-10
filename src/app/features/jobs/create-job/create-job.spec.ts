@@ -104,4 +104,23 @@ describe('CreateJob (SCRUM-138)', () => {
     fixture.componentInstance.submit();
     expect(fixture.componentInstance.errorMessage()).toBe('Category không hợp lệ.');
   });
+
+  it('không gửi API nếu số lượng tuyển là số thập phân', () => {
+    const fixture = TestBed.createComponent(CreateJob);
+    const component = fixture.componentInstance;
+
+    fillValid(component);
+
+    component.form.patchValue({
+      numberOfPositions: 1.5
+    });
+
+    expect(component.form.controls.numberOfPositions.invalid)
+      .toBe(true);
+
+    component.submit();
+
+    expect(createJob).not.toHaveBeenCalled();
+  });
+
 });
