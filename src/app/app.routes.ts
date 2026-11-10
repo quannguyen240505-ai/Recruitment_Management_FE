@@ -17,6 +17,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/jobs/create-job/create-job').then(m => m.CreateJob)
   },
   {
+    path: 'recruiter/jobs',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/jobs/recruiter-jobs/recruiter-jobs')
+        .then(m => m.RecruiterJobs)
+  },
+  {
     path: 'jobs/:jobId',
     loadComponent: () => import('./features/jobs/job-detail/job-detail').then(m => m.JobDetail)
   },

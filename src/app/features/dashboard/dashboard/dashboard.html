@@ -1,7 +1,23 @@
-<h2>Dashboard</h2>
+<main class="dashboard">
+    <h1>Dashboard</h1>
 
-<p>Bạn đang đăng nhập.</p>
+    <p>Bạn đang đăng nhập.</p>
 
-<button type="button" (click)="logout()">
-    Đăng xuất
-</button>
+    <nav aria-label="Điều hướng Dashboard">
+        <a routerLink="/recruiter/jobs">
+            Quản lý tin tuyển dụng
+        </a>
+
+        <br />
+
+        <a routerLink="/recruiter/jobs/create">
+            Tạo tin tuyển dụng
+        </a>
+    </nav>
+
+    <br />
+
+    <button type="button" (click)="logout()">
+        Đăng xuất
+    </button>
+</main>

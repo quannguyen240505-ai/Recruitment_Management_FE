@@ -1,0 +1,228 @@
+<div class="jobs-page">
+
+    <header class="page-header">
+        <a routerLink="/dashboard" class="brand">
+            <span class="brand-logo">R</span>
+
+            <span class="brand-info">
+                <strong>Recruitly</strong>
+                <small>Recruitment Platform</small>
+            </span>
+        </a>
+
+        <a routerLink="/dashboard" class="header-link">
+            Dashboard
+        </a>
+    </header>
+
+    <main class="page-content">
+
+        <!-- Page heading -->
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">RECRUITER DASHBOARD</p>
+                <h1>Quản lý tin tuyển dụng</h1>
+                <p class="page-description">
+                    Theo dõi và quản lý những công việc bạn đã đăng tuyển.
+                </p>
+            </div>
+
+            <a routerLink="/recruiter/jobs/create" class="create-button">
+                + Tạo tin tuyển dụng
+            </a>
+        </section>
+
+        <!-- Main jobs card -->
+        <section class="jobs-card">
+
+            <div class="card-heading">
+                <div>
+                    <h2>Danh sách tin tuyển dụng</h2>
+
+                    @if (!loading() && !error()) {
+                    <p>
+                        Có {{ totalCount() }} tin tuyển dụng
+                        theo bộ lọc hiện tại.
+                    </p>
+                    }
+                </div>
+
+                <button type="button" class="refresh-button" [disabled]="loading()" (click)="refresh()">
+                    Làm mới
+                </button>
+            </div>
+
+            <!-- Status filters -->
+            <div class="filter-tabs" aria-label="Lọc trạng thái">
+
+                <button type="button" [class.active]="selectedStatus() === 'ALL'"
+                    [attr.aria-pressed]="selectedStatus() === 'ALL'" (click)="setFilter('ALL')">
+                    Tất cả
+                </button>
+
+                <button type="button" [class.active]="selectedStatus() === 'OPEN'"
+                    [attr.aria-pressed]="selectedStatus() === 'OPEN'" (click)="setFilter('OPEN')">
+                    Đang tuyển
+                </button>
+
+                <button type="button" [class.active]="selectedStatus() === 'PAUSED'"
+                    [attr.aria-pressed]="selectedStatus() === 'PAUSED'" (click)="setFilter('PAUSED')">
+                    Tạm dừng
+                </button>
+
+                <button type="button" [class.active]="selectedStatus() === 'CLOSED'"
+                    [attr.aria-pressed]="selectedStatus() === 'CLOSED'" (click)="setFilter('CLOSED')">
+                    Đã đóng
+                </button>
+
+            </div>
+
+            <!-- Loading state -->
+            @if (loading()) {
+
+            <div class="state-container" role="status">
+                <div class="spinner" aria-hidden="true"></div>
+
+                <h3>Đang tải dữ liệu...</h3>
+                <p>Vui lòng chờ trong khi tải tin tuyển dụng.</p>
+            </div>
+
+            } @else if (error()) {
+
+            <!-- Error state -->
+            <div class="state-container" role="alert">
+                <div class="state-icon error-icon">!</div>
+
+                <h3>Không thể tải dữ liệu</h3>
+                <p>{{ error() }}</p>
+
+                <button type="button" class="state-button" (click)="refresh()">
+                    Thử lại
+                </button>
+            </div>
+
+            } @else if (jobs().length === 0) {
+
+            <!-- Empty state -->
+            <div class="state-container">
+                <div class="state-icon">+</div>
+
+                <h3>Chưa có tin tuyển dụng</h3>
+
+                <p>
+                    Không tìm thấy tin tuyển dụng phù hợp
+                    với trạng thái đã chọn.
+                </p>
+
+                <a routerLink="/recruiter/jobs/create" class="state-button">
+                    Tạo tin tuyển dụng
+                </a>
+            </div>
+
+            } @else {
+
+            <!-- Jobs table -->
+            <div class="table-wrapper">
+                <table class="jobs-table">
+
+                    <thead>
+                        <tr>
+                            <th>Công việc</th>
+                            <th>Công ty</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày đăng</th>
+                            <th>Hạn nộp</th>
+                            <th class="action-column">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (job of jobs(); track job.jobId) {
+
+                        <tr>
+                            <td>
+                                <div class="job-title">
+                                    {{ job.title }}
+                                </div>
+
+                                <small class="job-id">
+                                    ID: {{ job.jobId }}
+                                </small>
+                            </td>
+
+                            <td>
+                                {{ job.companyName }}
+                            </td>
+
+                            <td>
+                                <span class="status-badge" [class.status-open]="job.status === 'OPEN'"
+                                    [class.status-paused]="job.status === 'PAUSED'"
+                                    [class.status-closed]="job.status === 'CLOSED'">
+                                    {{ getStatusLabel(job.status) }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ job.createdAt | date:'dd/MM/yyyy' }}
+                            </td>
+
+                            <td>
+                                {{ job.deadline | date:'dd/MM/yyyy' }}
+                            </td>
+
+                            <td class="action-column">
+                                @if (job.status === 'OPEN') {
+                                <a [routerLink]="['/jobs', job.jobId]" class="detail-link">
+                                    Xem chi tiết
+                                </a>
+                                } @else {
+                                <span class="unavailable-link">
+                                    Không khả dụng
+                                </span>
+                                }
+                            </td>
+                        </tr>
+
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+
+                <p>
+                    Hiển thị {{ startItem() }}–{{ endItem() }}
+                    trong {{ totalCount() }} tin
+                </p>
+
+                <div class="pagination-actions">
+                    <button type="button" [disabled]="currentPage() <= 1 || loading()"
+                        (click)="goToPage(currentPage() - 1)">
+                        Trước
+                    </button>
+
+                    <span class="page-indicator">
+                        Trang {{ currentPage() }} / {{ totalPages() }}
+                    </span>
+
+                    <button type="button" [disabled]="currentPage() >= totalPages() || loading()"
+                        (click)="goToPage(currentPage() + 1)">
+                        Tiếp
+                    </button>
+                </div>
+
+            </div>
+
+            }
+
+        </section>
+
+    </main>
+
+    <footer class="page-footer">
+        © 2026 Recruitly. All rights reserved.
+    </footer>
+
+</div>
