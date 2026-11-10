@@ -1,0 +1,24 @@
+<main class="detail-page">
+  <a routerLink="/recruiter/jobs/create" class="link">← Tạo tin tuyển dụng khác</a>
+  @if (loading()) { <p>Đang tải chi tiết tin tuyển dụng...</p> }
+  @else if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  @else if (job(); as item) {
+    <article class="detail-card">
+      <span class="status">{{ item.status }}</span>
+      <h1>{{ item.title }}</h1>
+      <p class="subheading">{{ item.company.name }} · {{ item.location }}</p>
+      <div class="stats">
+        <span>Hình thức: {{ item.jobType }}</span>
+        <span>Kinh nghiệm: {{ item.experience }}</span>
+        <span>Số lượng tuyển: {{ item.numberOfPositions }}</span>
+        <span>Hạn nộp: {{ item.deadline.slice(0, 10) }}</span>
+      </div>
+      <h2>Mô tả công việc</h2>
+      <p class="paragraph">{{ item.description }}</p>
+      <h2>Yêu cầu ứng viên</h2>
+      <p class="paragraph">{{ item.requirements }}</p>
+      <h2>Kỹ năng</h2>
+      <ul>@for (skill of item.skills; track skill.skillId) { <li>{{ skill.name }}</li> }</ul>
+    </article>
+  }
+</main>

@@ -24,6 +24,19 @@ export const routes: Routes = [
                 .then(m => m.Dashboard)
     },
     {
+        path: 'recruiter/jobs/create',
+        canActivate: [authGuard],
+        loadComponent: () =>
+            import('./features/jobs/create-job/create-job')
+                .then(m => m.CreateJob)
+    },
+    {
+        path: 'jobs/:jobId',
+        loadComponent: () =>
+            import('./features/jobs/job-detail/job-detail')
+                .then(m => m.JobDetail)
+    },
+    {
         path: '',
         pathMatch: 'full',
         redirectTo: 'login'
