@@ -1,1 +1,119 @@
-<p>login works!</p>
+<div class="login-page">
+    <!-- Decorative circles -->
+    <div class="decor decor-top"></div>
+    <div class="decor decor-bottom"></div>
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="brand-logo">R</div>
+
+        <div class="brand-copy">
+            <div class="brand-name">Recruitly</div>
+            <div class="brand-subtitle">Recruitment Platform</div>
+        </div>
+    </header>
+
+    <div class="copyright">© 2026 Recruitly</div>
+
+    <!-- Login card -->
+    <main class="login-card">
+        <h1>Đăng nhập</h1>
+
+        <p class="welcome-text">
+            Chào mừng bạn quay lại hệ thống tuyển dụng.
+        </p>
+
+        <!-- Google -->
+        <div class="google-button-wrapper">
+            <div #googleButtonHost class="google-button-host">
+            </div>
+
+            @if (isGoogleLoading) {
+            <div class="google-loading">
+                Đang xác thực Google...
+            </div>
+            }
+        </div>
+        <!-- Divider -->
+        <div class="divider">
+            <span></span>
+            <small>hoặc</small>
+            <span></span>
+        </div>
+
+        <!-- Login form -->
+        <form [formGroup]="loginForm" (ngSubmit)="submit()" class="login-form">
+            <div class="field email-field">
+                <label for="username">Tên đăng nhập</label>
+
+                <input id="username" type="text" formControlName="username" placeholder="Nhập tên đăng nhập"
+                    autocomplete="username" />
+
+                @if (
+                loginForm.controls.username.touched &&
+                loginForm.controls.username.invalid
+                ) {
+                <div class="field-error">
+                    Vui lòng nhập tên đăng nhập.
+                </div>
+                }
+            </div>
+
+            <div class="field password-field">
+                <label for="password">Mật khẩu</label>
+
+                <div class="password-wrapper">
+                    <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                        placeholder="••••••••••" autocomplete="current-password" />
+
+                    <button class="password-toggle" type="button" (click)="showPassword = !showPassword"
+                        aria-label="Hiển thị mật khẩu">
+                        ◉
+                    </button>
+                </div>
+
+                @if (
+                loginForm.controls.password.touched &&
+                loginForm.controls.password.invalid
+                ) {
+                <div class="field-error">
+                    Vui lòng nhập mật khẩu.
+                </div>
+                }
+            </div>
+
+            <div class="form-options">
+                <label class="remember">
+                    <input type="checkbox" />
+                    <span>Ghi nhớ đăng nhập</span>
+                </label>
+
+                <a class="forgot-password" href="#" (click)="$event.preventDefault()">
+                    Quên mật khẩu?
+                </a>
+            </div>
+
+            @if (errorMessage) {
+            <div class="login-error">
+                {{ errorMessage }}
+            </div>
+            }
+
+            <button class="login-button" type="submit" [disabled]="isLoading">
+                @if (isLoading) {
+                Đang đăng nhập...
+                } @else {
+                Đăng nhập
+                }
+            </button>
+        </form>
+
+        <div class="register-area">
+            <div>Chưa có tài khoản?</div>
+
+            <a href="#" (click)="$event.preventDefault()">
+                Tạo tài khoản
+            </a>
+        </div>
+    </main>
+</div>
