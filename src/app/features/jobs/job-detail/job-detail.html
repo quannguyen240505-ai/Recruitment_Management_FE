@@ -1,24 +1,205 @@
 <main class="detail-page">
-  <a routerLink="/recruiter/jobs/create" class="link">← Tạo tin tuyển dụng khác</a>
-  @if (loading()) { <p>Đang tải chi tiết tin tuyển dụng...</p> }
-  @else if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-  @else if (job(); as item) {
-    <article class="detail-card">
-      <span class="status">{{ item.status }}</span>
-      <h1>{{ item.title }}</h1>
-      <p class="subheading">{{ item.company.name }} · {{ item.location }}</p>
-      <div class="stats">
-        <span>Hình thức: {{ item.jobType }}</span>
-        <span>Kinh nghiệm: {{ item.experience }}</span>
-        <span>Số lượng tuyển: {{ item.numberOfPositions }}</span>
-        <span>Hạn nộp: {{ item.deadline.slice(0, 10) }}</span>
+  <div class="container">
+
+    <header class="page-header">
+      <a routerLink="/dashboard" class="brand">
+        <span class="brand-icon">R</span>
+        <span>
+          <strong>Recruitly</strong>
+          <small>Recruitment Platform</small>
+        </span>
+      </a>
+
+      <a routerLink="/dashboard" class="back-link">
+        ← Về Dashboard
+      </a>
+    </header>
+
+    @if (loading()) {
+    <section class="state-card" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <h2>Đang tải công việc...</h2>
+      <p>Hệ thống đang lấy thông tin tuyển dụng.</p>
+    </section>
+
+    } @else if (error()) {
+    <section class="state-card" role="alert">
+      <div class="state-icon">!</div>
+
+      <h2>Không thể hiển thị công việc</h2>
+      <p>{{ error() }}</p>
+
+      <div class="state-actions">
+        <button type="button" (click)="retry()">
+          Thử lại
+        </button>
+
+        <a routerLink="/dashboard">
+          Về Dashboard
+        </a>
       </div>
-      <h2>Mô tả công việc</h2>
-      <p class="paragraph">{{ item.description }}</p>
-      <h2>Yêu cầu ứng viên</h2>
-      <p class="paragraph">{{ item.requirements }}</p>
-      <h2>Kỹ năng</h2>
-      <ul>@for (skill of item.skills; track skill.skillId) { <li>{{ skill.name }}</li> }</ul>
-    </article>
-  }
+    </section>
+
+    } @else if (job(); as item) {
+
+    <div class="breadcrumb">
+      <span>Recruitly</span>
+      <span>/</span>
+      <span>Job Details</span>
+    </div>
+
+    <section class="job-header">
+      <div class="header-content">
+        <span class="status-badge" [class.status-open]="item.status === 'OPEN'">
+          {{ getStatusLabel(item.status) }}
+        </span>
+
+        <h1>{{ item.title }}</h1>
+
+        <p class="company-subtitle">
+          {{ item.company.name }} · {{ item.location }}
+        </p>
+
+        <div class="job-tags">
+          <span>{{ getJobTypeLabel(item.jobType) }}</span>
+          <span>{{ item.experience }}</span>
+          <span>{{ item.numberOfPositions }} vị trí</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="detail-layout">
+
+      <article class="main-card">
+        <section class="content-section">
+          <h2>Thông tin tuyển dụng</h2>
+
+          <div class="information-grid">
+            <div class="info-item">
+              <span>Địa điểm</span>
+              <strong>{{ item.location }}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Hình thức làm việc</span>
+              <strong>
+                {{ getJobTypeLabel(item.jobType) }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Kinh nghiệm</span>
+              <strong>{{ item.experience }}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Số lượng tuyển</span>
+              <strong>{{ item.numberOfPositions }}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Mức lương</span>
+              <strong>
+                {{ formatSalary(item.salaryMin, item.salaryMax) }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Hạn nộp hồ sơ</span>
+              <strong>
+                {{ item.deadline | date:'dd/MM/yyyy' }}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section">
+          <h2>Mô tả công việc</h2>
+          <p class="description">
+            {{ item.description }}
+          </p>
+        </section>
+
+        <section class="content-section">
+          <h2>Yêu cầu ứng viên</h2>
+          <p class="description">
+            {{ item.requirements }}
+          </p>
+        </section>
+
+        <section class="content-section">
+          <h2>Kỹ năng yêu cầu</h2>
+
+          @if (item.skills.length > 0) {
+          <div class="skills-list">
+            @for (skill of item.skills; track skill.skillId) {
+            <span class="skill-tag">
+              {{ skill.name }}
+            </span>
+            }
+          </div>
+          } @else {
+          <p class="muted">
+            Chưa cập nhật kỹ năng yêu cầu.
+          </p>
+          }
+        </section>
+      </article>
+
+      <aside class="side-column">
+        <section class="side-card">
+          <div class="company-avatar" aria-hidden="true">
+            {{ item.company.name.charAt(0) }}
+          </div>
+
+          <h2>{{ item.company.name }}</h2>
+
+          <p class="muted">Thông tin doanh nghiệp</p>
+
+          @if (item.company.address) {
+          <div class="company-field">
+            <span>Địa chỉ</span>
+            <p>{{ item.company.address }}</p>
+          </div>
+          }
+
+          @if (item.company.website) {
+          <div class="company-field">
+            <span>Website</span>
+            <a [href]="item.company.website" target="_blank" rel="noopener noreferrer">
+              Truy cập website
+            </a>
+          </div>
+          }
+        </section>
+
+        <section class="side-card">
+          <h2>Thông tin bổ sung</h2>
+
+          <div class="company-field">
+            <span>Ngày đăng</span>
+            <strong>
+              {{ item.createdAt | date:'dd/MM/yyyy' }}
+            </strong>
+          </div>
+
+          <div class="company-field">
+            <span>Trạng thái</span>
+            <strong>
+              {{ getStatusLabel(item.status) }}
+            </strong>
+          </div>
+
+          <div class="company-field">
+            <span>Mã tin tuyển dụng</span>
+            <p class="job-id">{{ item.jobId }}</p>
+          </div>
+        </section>
+      </aside>
+
+    </div>
+
+    }
+
+  </div>
 </main>
