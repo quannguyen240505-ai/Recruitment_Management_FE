@@ -1,0 +1,138 @@
+<div class="recruiter-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/dashboard">RMS <span>/ Recruiter</span></a>
+    <div class="sidebar-caption">HỆ THỐNG TUYỂN DỤNG</div>
+    <nav class="sidebar-nav" aria-label="Menu nhà tuyển dụng">
+      <a routerLink="/dashboard" class="nav-item">Tổng quan</a>
+      <span class="nav-item nav-unavailable" title="Chưa triển khai">Hồ sơ công ty</span>
+      <span class="nav-item active" aria-current="page">Tin tuyển dụng</span>
+      <span class="nav-item nav-unavailable" title="Chưa triển khai">Ứng viên</span>
+    </nav>
+    <div class="sidebar-account">
+      <strong>Tài khoản Recruiter</strong>
+      <span>Recruitment Management</span>
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <span>Workspace <span class="crumb-divider">/</span> Job Create</span>
+      <div class="avatar" aria-label="Recruiter">R</div>
+    </header>
+
+    <main class="main-content">
+      <a class="back-link" routerLink="/dashboard">← Quay lại tổng quan</a>
+      <h1>Tạo tin tuyển dụng</h1>
+      <p class="subtitle">Điền thông tin vị trí để bắt đầu nhận hồ sơ ứng viên.</p>
+
+      <div class="content-grid">
+        <section class="form-card" aria-labelledby="form-title">
+          <h2 id="form-title">Thông tin công việc</h2>
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="form-grid">
+              <div class="field full-width">
+                <label for="job-title">Chức danh công việc <span class="required">*</span></label>
+                <input id="job-title" formControlName="title" type="text" placeholder="Nhập chức danh công việc"
+                  [class.field-invalid]="invalid('title')" />
+                @if (invalid('title')) { <small class="field-error">Vui lòng nhập chức danh.</small> }
+              </div>
+
+              <div class="field">
+                <label for="category">Phòng ban / Danh mục <span class="required">*</span></label>
+                <input id="category" formControlName="categoryId" type="text" placeholder="Nhập Category ID hợp lệ"
+                  [class.field-invalid]="invalid('categoryId')" />
+                <small>Đang dùng ID tạm, chờ API danh mục.</small>
+              </div>
+              <div class="field">
+                <label for="job-type">Hình thức làm việc <span class="required">*</span></label>
+                <select id="job-type" formControlName="jobType" [class.field-invalid]="invalid('jobType')">
+                  <option value="">Chọn hình thức làm việc</option>
+                  @for (type of jobTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="location">Địa điểm <span class="required">*</span></label>
+                <input id="location" formControlName="location" type="text" placeholder="Ví dụ: Hà Nội"
+                  [class.field-invalid]="invalid('location')" />
+              </div>
+              <div class="field">
+                <label for="experience">Kinh nghiệm <span class="required">*</span></label>
+                <input id="experience" formControlName="experience" type="text" placeholder="Ví dụ: 1–2 năm"
+                  [class.field-invalid]="invalid('experience')" />
+              </div>
+
+              <div class="field">
+                <label for="salary-min">Lương tối thiểu (VNĐ)</label>
+                <input id="salary-min" formControlName="salaryMin" type="number" min="0" placeholder="Thỏa thuận"
+                  [class.field-invalid]="invalid('salaryMin')" />
+              </div>
+              <div class="field">
+                <label for="salary-max">Lương tối đa (VNĐ)</label>
+                <input id="salary-max" formControlName="salaryMax" type="number" min="0" placeholder="Thỏa thuận"
+                  [class.field-invalid]="invalid('salaryMax')" />
+              </div>
+
+              <div class="field">
+                <label for="number-of-positions">Số lượng tuyển <span class="required">*</span></label>
+                <input id="number-of-positions" formControlName="numberOfPositions" type="number" min="1" step="1"
+                  [class.field-invalid]="invalid('numberOfPositions')" />
+              </div>
+              <div class="field">
+                <label for="deadline">Hạn nộp hồ sơ <span class="required">*</span></label>
+                <input id="deadline" formControlName="deadline" type="date" [min]="minDeadline"
+                  [class.field-invalid]="invalid('deadline')" />
+              </div>
+
+              <div class="field full-width">
+                <label for="skill-ids">Kỹ năng yêu cầu <span class="required">*</span></label>
+                <input id="skill-ids" formControlName="skillIdsText" type="text"
+                  placeholder="Nhập Skill ID hợp lệ, cách nhau bằng dấu phẩy"
+                  [class.field-invalid]="invalid('skillIdsText')" />
+                <small>Ví dụ: ID kỹ năng 1, ID kỹ năng 2. Sẽ đổi thành chọn nhiều khi có API Skills.</small>
+              </div>
+
+              <div class="field full-width">
+                <label for="description">Mô tả công việc <span class="required">*</span></label>
+                <textarea id="description" formControlName="description" rows="5"
+                  placeholder="Nhập mô tả, trách nhiệm và quyền lợi..."
+                  [class.field-invalid]="invalid('description')"></textarea>
+              </div>
+              <div class="field full-width">
+                <label for="requirements">Yêu cầu ứng viên <span class="required">*</span></label>
+                <textarea id="requirements" formControlName="requirements" rows="5"
+                  placeholder="Nhập kỹ năng, kinh nghiệm và yêu cầu ứng viên..."
+                  [class.field-invalid]="invalid('requirements')"></textarea>
+              </div>
+            </div>
+
+            @if (errorMessage()) { <div class="notice notice-error" role="alert">{{ errorMessage() }}</div> }
+            @if (infoMessage()) { <div class="notice notice-success" role="status">{{ infoMessage() }}</div> }
+
+            <div class="form-actions">
+              @if (hasDraft()) {
+              <button class="btn btn-link" type="button" (click)="restoreDraft()" [disabled]="loading()">Khôi phục
+                nháp</button>
+              }
+              <button class="btn btn-outline" type="button" (click)="saveDraft()" [disabled]="loading()">Lưu
+                nháp</button>
+              <button class="btn btn-primary" type="submit" [disabled]="loading()">{{ loading() ? 'Đang đăng tuyển...' :
+                'Đăng tuyển' }}</button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="tips-card" aria-label="Gợi ý đăng tuyển">
+          <h2>Gợi ý</h2>
+          <ul>
+            <li>Chức danh rõ ràng</li>
+            <li>Mô tả trách nhiệm cụ thể</li>
+            <li>Nêu quyền lợi và yêu cầu</li>
+            <li>Kiểm tra trước khi đăng</li>
+          </ul>
+          <p class="tips-note">“Lưu nháp” chỉ lưu trên trình duyệt; chưa tạo Job trên server.</p>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
