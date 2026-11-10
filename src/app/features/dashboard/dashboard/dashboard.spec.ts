@@ -1,19 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 
 import { Dashboard } from './dashboard';
 import { Auth } from '../../../core/services/auth';
 
-describe('Dashboard', () => {
+describe('Dashboard - SCRUM-135', () => {
     let component: Dashboard;
+    let router: Router;
 
     const authMock = {
         logout: vi.fn()
-    };
-
-    const routerMock = {
-        navigate: vi.fn()
     };
 
     beforeEach(async () => {
@@ -22,19 +19,34 @@ describe('Dashboard', () => {
         await TestBed.configureTestingModule({
             imports: [Dashboard],
             providers: [
-                { provide: Auth, useValue: authMock },
-                { provide: Router, useValue: routerMock }
+                provideRouter([]),
+                {
+                    provide: Auth,
+                    useValue: authMock
+                }
             ]
         }).compileComponents();
 
+        router = TestBed.inject(Router);
+
         const fixture = TestBed.createComponent(Dashboard);
         component = fixture.componentInstance;
+
+        fixture.detectChanges();
+    });
+
+    it('should create dashboard', () => {
+        expect(component).toBeTruthy();
     });
 
     it('should logout and navigate to login', () => {
+        const navigateSpy = vi
+            .spyOn(router, 'navigate')
+            .mockResolvedValue(true);
+
         component.logout();
 
         expect(authMock.logout).toHaveBeenCalledOnce();
-        expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+        expect(navigateSpy).toHaveBeenCalledWith(['/login']);
     });
 });

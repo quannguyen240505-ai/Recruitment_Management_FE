@@ -14,3 +14,8 @@ export interface LoginResponse {
 export interface GoogleLoginRequest {
     idToken: string;
 }
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}

@@ -3,10 +3,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+
 import {
   GoogleLoginRequest,
   LoginRequest,
-  LoginResponse
+  LoginResponse,
+  ChangePasswordRequest
 } from '../models/auth.models';
 
 @Injectable({
@@ -18,8 +20,11 @@ export class Auth {
   private readonly accessTokenKey = 'access_token';
   private readonly userKey = 'auth_user';
 
-  readonly isAuthenticated = signal<boolean>(this.hasAccessToken());
+  readonly isAuthenticated = signal<boolean>(
+    this.hasAccessToken()
+  );
 
+  // 1. LOGIN - Username / Password
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(
@@ -28,19 +33,12 @@ export class Auth {
       )
       .pipe(
         tap(response => {
-          this.setAccessToken(response.accessToken);
-
-          localStorage.setItem(
-            this.userKey,
-            JSON.stringify({
-              userId: response.userId,
-              username: response.username,
-              role: response.role
-            })
-          );
+          this.saveSession(response);
         })
       );
   }
+
+  // 2. GOOGLE LOGIN
   googleLogin(idToken: string): Observable<LoginResponse> {
     const request: GoogleLoginRequest = {
       idToken
@@ -53,20 +51,36 @@ export class Auth {
       )
       .pipe(
         tap(response => {
-          this.setAccessToken(response.accessToken);
-
-          localStorage.setItem(
-            this.userKey,
-            JSON.stringify({
-              userId: response.userId,
-              username: response.username,
-              role: response.role
-            })
-          );
+          this.saveSession(response);
         })
       );
   }
 
+  // 3. CHANGE PASSWORD - SCRUM-135
+  changePassword(
+    request: ChangePasswordRequest
+  ): Observable<void> {
+    return this.http.put<void>(
+      `${environment.apiUrl}/auth/change-password`,
+      request
+    );
+  }
+
+  // 4. SAVE SESSION
+  private saveSession(response: LoginResponse): void {
+    this.setAccessToken(response.accessToken);
+
+    localStorage.setItem(
+      this.userKey,
+      JSON.stringify({
+        userId: response.userId,
+        username: response.username,
+        role: response.role
+      })
+    );
+  }
+
+  // 5. TOKEN MANAGEMENT
   setAccessToken(token: string): void {
     localStorage.setItem(this.accessTokenKey, token);
     this.isAuthenticated.set(true);
@@ -80,6 +94,7 @@ export class Auth {
     return !!this.getAccessToken();
   }
 
+  // 6. LOGOUT
   clearSession(): void {
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.userKey);
