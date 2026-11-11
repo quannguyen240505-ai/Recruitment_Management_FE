@@ -1,14 +1,30 @@
-
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
-  // Authentication
+  // Login
   {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login')
         .then(m => m.Login)
+  },
+
+  // SCRUM-119: Candidate Registration
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register')
+        .then(m => m.Register)
+  },
+
+  // SCRUM-135: Change Password
+  {
+    path: 'change-password',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/auth/change-password/change-password')
+        .then(m => m.ChangePassword)
   },
 
   // Dashboard
@@ -20,7 +36,7 @@ export const routes: Routes = [
         .then(m => m.Dashboard)
   },
 
-  // Create Job
+  // Recruiter: Create Job
   {
     path: 'recruiter/jobs/create',
     canActivate: [authGuard],
@@ -29,8 +45,15 @@ export const routes: Routes = [
         .then(m => m.CreateJob)
   },
 
-  // SCRUM-144: Search Jobs
-  // Route cu the phai nam truoc route co tham so
+  // Public Job Details
+  {
+    path: 'recruiter/jobs',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/jobs/recruiter-jobs/recruiter-jobs')
+        .then(m => m.RecruiterJobs)
+  },
+  // SCRUM-144: Public Search Jobs (must precede jobs/:jobId)
   {
     path: 'jobs/search',
     loadComponent: () =>
@@ -38,7 +61,6 @@ export const routes: Routes = [
         .then(m => m.SearchJobs)
   },
 
-  // Job Details
   {
     path: 'jobs/:jobId',
     loadComponent: () =>
@@ -46,14 +68,14 @@ export const routes: Routes = [
         .then(m => m.JobDetail)
   },
 
-  // Default
+  // Default Route
   {
     path: '',
     pathMatch: 'full',
     redirectTo: 'login'
   },
 
-  // Not Found
+  // Fallback Route
   {
     path: '**',
     redirectTo: 'login'

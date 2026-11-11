@@ -5,10 +5,6 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 
-// =====================================================
-// SHARED TYPES
-// =====================================================
-
 export type JobType =
   | 'FULL_TIME'
   | 'PART_TIME'
@@ -16,9 +12,10 @@ export type JobType =
   | 'CONTRACT'
   | 'FREELANCE';
 
-// =====================================================
-// SCRUM-138 - CREATE JOB
-// =====================================================
+export type JobStatus =
+  | 'OPEN'
+  | 'CLOSED'
+  | 'PAUSED';
 
 export interface CreateJobRequest {
   title: string;
@@ -41,10 +38,6 @@ export interface CreateJobResponse {
   status: string;
   createdAt: string;
 }
-
-// =====================================================
-// SCRUM-147 - JOB DETAILS
-// =====================================================
 
 export interface JobDetailResponse {
   jobId: string;
@@ -74,10 +67,25 @@ export interface JobDetailResponse {
   }[];
 }
 
-// =====================================================
-// SCRUM-144 - SEARCH & FILTER JOBS
-// =====================================================
+// SCRUM-141 - Recruiter Jobs List
+export interface RecruiterJobSummary {
+  jobId: string;
+  title: string;
+  status: JobStatus;
+  companyName: string;
+  deadline: string;
+  createdAt: string;
+}
 
+export interface RecruiterJobsResponse {
+  items: RecruiterJobSummary[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// SCRUM-144 - Public Search Jobs
 export interface SearchJobsFilters {
   keyword?: string;
   location?: string;
@@ -87,9 +95,7 @@ export interface SearchJobsFilters {
   skillId?: string;
   categoryId?: string;
   companyId?: string;
-
-  // Search API starts paging at 0
-  page?: number;
+  page?: number;  // zero-based for public search
   size?: number;
 }
 
@@ -115,129 +121,67 @@ export interface SearchJobsResponse {
   totalItems: number;
 }
 
-// =====================================================
-// JOB SERVICE
-// =====================================================
-
 @Injectable({
   providedIn: 'root'
 })
 export class JobService {
-
   private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/Jobs`;
 
-  private readonly apiUrl =
-    `${environment.apiUrl}/Jobs`;
-
-  // -------------------------------------------------
   // SCRUM-138 - CREATE JOB
-  // POST /api/Jobs
-  // -------------------------------------------------
-
   createJob(
     body: CreateJobRequest
   ): Observable<CreateJobResponse> {
-
     return this.http.post<CreateJobResponse>(
       this.apiUrl,
       body
     );
   }
 
-  // -------------------------------------------------
-  // SCRUM-147 - GET JOB DETAILS
-  // GET /api/Jobs/{jobId}
-  // -------------------------------------------------
-
+  // GET JOB DETAILS
   getJobDetail(
     jobId: string
   ): Observable<JobDetailResponse> {
-
     return this.http.get<JobDetailResponse>(
       `${this.apiUrl}/${encodeURIComponent(jobId)}`
     );
   }
 
-  // -------------------------------------------------
-  // SCRUM-144 - SEARCH & FILTER JOBS
-  // GET /api/Jobs
-  // -------------------------------------------------
+  // SCRUM-141 - GET RECRUITER JOBS
+  getRecruiterJobs(
+    page: number = 1,
+    pageSize: number = 10,
+    status?: JobStatus
+  ): Observable<RecruiterJobsResponse> {
 
-  searchJobs(
-    filters: SearchJobsFilters = {}
-  ): Observable<SearchJobsResponse> {
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
 
+    if (status) {
+      params = params.set('status', status);
+    }
+
+    return this.http.get<RecruiterJobsResponse>(
+      `${environment.apiUrl}/recruiter/jobs`,
+      { params }
+    );
+  }
+  // SCRUM-144 - GET /api/Jobs (public search, zero-based pagination)
+  searchJobs(filters: SearchJobsFilters = {}): Observable<SearchJobsResponse> {
     let params = new HttpParams()
       .set('page', String(filters.page ?? 0))
       .set('size', String(filters.size ?? 10));
 
-    // Keyword
-    if (filters.keyword?.trim()) {
-      params = params.set(
-        'keyword',
-        filters.keyword.trim()
-      );
-    }
+    if (filters.keyword?.trim()) params = params.set('keyword', filters.keyword.trim());
+    if (filters.location?.trim()) params = params.set('location', filters.location.trim());
+    if (filters.jobType) params = params.set('jobType', filters.jobType);
+    if (filters.experience?.trim()) params = params.set('experience', filters.experience.trim());
+    if (filters.salaryMin != null) params = params.set('salaryMin', String(filters.salaryMin));
+    if (filters.skillId?.trim()) params = params.set('skillId', filters.skillId.trim());
+    if (filters.categoryId?.trim()) params = params.set('categoryId', filters.categoryId.trim());
+    if (filters.companyId?.trim()) params = params.set('companyId', filters.companyId.trim());
 
-    // Location
-    if (filters.location?.trim()) {
-      params = params.set(
-        'location',
-        filters.location.trim()
-      );
-    }
-
-    // Job type
-    if (filters.jobType) {
-      params = params.set(
-        'jobType',
-        filters.jobType
-      );
-    }
-
-    // Experience
-    if (filters.experience?.trim()) {
-      params = params.set(
-        'experience',
-        filters.experience.trim()
-      );
-    }
-
-    // Minimum salary
-    if (filters.salaryMin != null) {
-      params = params.set(
-        'salaryMin',
-        String(filters.salaryMin)
-      );
-    }
-
-    // Skill
-    if (filters.skillId?.trim()) {
-      params = params.set(
-        'skillId',
-        filters.skillId.trim()
-      );
-    }
-
-    // Category
-    if (filters.categoryId?.trim()) {
-      params = params.set(
-        'categoryId',
-        filters.categoryId.trim()
-      );
-    }
-
-    // Company
-    if (filters.companyId?.trim()) {
-      params = params.set(
-        'companyId',
-        filters.companyId.trim()
-      );
-    }
-
-    return this.http.get<SearchJobsResponse>(
-      this.apiUrl,
-      { params }
-    );
+    return this.http.get<SearchJobsResponse>(this.apiUrl, { params });
   }
 }
