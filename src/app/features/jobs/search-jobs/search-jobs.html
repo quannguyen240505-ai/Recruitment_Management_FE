@@ -1,0 +1,157 @@
+<div class="search-page">
+    <header class="site-header">
+        <a routerLink="/jobs/search" class="brand">
+            <span class="brand-icon">R</span>
+            <span>
+                <strong>Recruitly</strong>
+                <small>Recruitment Platform</small>
+            </span>
+        </a>
+        <a routerLink="/login" class="login-link">Đăng nhập</a>
+    </header>
+
+    <main class="content">
+        <section class="hero">
+            <p class="eyebrow">FIND YOUR NEXT OPPORTUNITY</p>
+            <h1>Tìm kiếm việc làm phù hợp</h1>
+            <p>Khám phá các cơ hội tuyển dụng mới nhất.</p>
+        </section>
+
+        <div class="layout">
+            <aside class="filter-card">
+                <div class="section-heading">
+                    <h2>Bộ lọc tìm kiếm</h2>
+                    <button type="button" class="text-button" (click)="clearFilters()">
+                        Xóa lọc
+                    </button>
+                </div>
+
+                <form (ngSubmit)="search()">
+                    <label for="keyword">Từ khóa</label>
+                    <input id="keyword" name="keyword" type="search" placeholder="Tên công việc, công ty..."
+                        [(ngModel)]="filters.keyword" />
+
+                    <label for="location">Địa điểm</label>
+                    <input id="location" name="location" placeholder="Ví dụ: Quy Nhơn" [(ngModel)]="filters.location" />
+
+                    <label for="jobType">Hình thức làm việc</label>
+                    <select id="jobType" name="jobType" [(ngModel)]="filters.jobType">
+                        <option value="">Tất cả hình thức</option>
+                        <option value="FULL_TIME">Toàn thời gian</option>
+                        <option value="PART_TIME">Bán thời gian</option>
+                        <option value="INTERNSHIP">Thực tập</option>
+                        <option value="CONTRACT">Hợp đồng</option>
+                        <option value="FREELANCE">Freelance</option>
+                    </select>
+
+                    <label for="experience">Kinh nghiệm</label>
+                    <input id="experience" name="experience" placeholder="Ví dụ: 1" [(ngModel)]="filters.experience" />
+
+                    <label for="salaryMin">Mức lương tối thiểu (VNĐ)</label>
+                    <input id="salaryMin" name="salaryMin" type="number" min="0" placeholder="Ví dụ: 10000000"
+                        [(ngModel)]="filters.salaryMin" />
+
+                    <button type="submit" class="primary-button" [disabled]="loading()">
+                        Tìm kiếm công việc
+                    </button>
+                </form>
+            </aside>
+
+            <section class="results" aria-label="Kết quả tìm kiếm">
+                <div class="results-header">
+                    <div>
+                        <h2>Việc làm đang tuyển</h2>
+                        @if (!loading() && !error()) {
+                        <p>Tìm thấy {{ totalItems() }} công việc</p>
+                        }
+                    </div>
+                    <button type="button" class="refresh-button" (click)="loadJobs()" [disabled]="loading()">
+                        Làm mới
+                    </button>
+                </div>
+
+                @if (loading()) {
+                <div class="state" role="status">
+                    <div class="spinner"></div>
+                    <h3>Đang tìm kiếm công việc...</h3>
+                    <p>Hệ thống đang tải dữ liệu tuyển dụng.</p>
+                </div>
+                } @else if (error()) {
+                <div class="state" role="alert">
+                    <div class="state-icon">!</div>
+                    <h3>Không thể tải dữ liệu</h3>
+                    <p>{{ error() }}</p>
+                    <button class="primary-button" (click)="loadJobs()">
+                        Thử lại
+                    </button>
+                </div>
+                } @else if (jobs().length === 0) {
+                <div class="state">
+                    <div class="state-icon">⌕</div>
+                    <h3>Không tìm thấy công việc phù hợp</h3>
+                    <p>Hãy thử thay đổi từ khóa hoặc bộ lọc.</p>
+                    <button class="primary-button" (click)="clearFilters()">
+                        Xóa bộ lọc
+                    </button>
+                </div>
+                } @else {
+                <div class="job-list">
+                    @for (job of jobs(); track job.jobId) {
+                    <article class="job-card">
+                        <div class="job-top">
+                            <div class="company-icon">
+                                {{ job.companyName.charAt(0) }}
+                            </div>
+                            <div class="job-info">
+                                <h3>
+                                    <a [routerLink]="['/jobs', job.jobId]">
+                                        {{ job.title }}
+                                    </a>
+                                </h3>
+                                <p>{{ job.companyName }}</p>
+                            </div>
+                        </div>
+
+                        <div class="job-tags">
+                            <span>{{ job.location }}</span>
+                            <span>{{ job.jobType }}</span>
+                            <span>{{ job.experience }}</span>
+                        </div>
+
+                        <div class="job-bottom">
+                            <div>
+                                <strong>
+                                    {{ formatSalary(job.salaryMin, job.salaryMax) }}
+                                </strong>
+                                <p>
+                                    Hạn nộp:
+                                    {{ job.deadline | date:'dd/MM/yyyy' }}
+                                </p>
+                            </div>
+                            <a class="detail-link" [routerLink]="['/jobs', job.jobId]">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </article>
+                    }
+                </div>
+
+                <div class="pagination">
+                    <p>
+                        Trang {{ page() + 1 }} / {{ totalPages() }}
+                    </p>
+                    <div class="pagination-buttons">
+                        <button type="button" [disabled]="page() === 0 || loading()" (click)="goToPage(page() - 1)">
+                            Trước
+                        </button>
+                        <button type="button" [disabled]="page() + 1 >= totalPages() || loading()"
+                            (click)="goToPage(page() + 1)">
+                            Tiếp
+                        </button>
+                    </div>
+                </div>
+                }
+            </section>
+        </div>
+    </main>
+</div>

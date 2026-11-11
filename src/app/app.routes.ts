@@ -53,6 +53,14 @@ export const routes: Routes = [
       import('./features/jobs/recruiter-jobs/recruiter-jobs')
         .then(m => m.RecruiterJobs)
   },
+  // SCRUM-144: Public Search Jobs (must precede jobs/:jobId)
+  {
+    path: 'jobs/search',
+    loadComponent: () =>
+      import('./features/jobs/search-jobs/search-jobs')
+        .then(m => m.SearchJobs)
+  },
+
   {
     path: 'jobs/:jobId',
     loadComponent: () =>

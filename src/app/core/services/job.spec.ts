@@ -13,10 +13,11 @@ import { environment } from '../../../environments/environment';
 import {
   CreateJobRequest,
   JobService,
-  RecruiterJobsResponse
+  RecruiterJobsResponse,
+  SearchJobsResponse
 } from './job';
 
-describe('JobService - SCRUM-138 & SCRUM-141', () => {
+describe('JobService - SCRUM-138, SCRUM-141 & SCRUM-144', () => {
   let service: JobService;
   let http: HttpTestingController;
 
@@ -194,5 +195,63 @@ describe('JobService - SCRUM-138 & SCRUM-141', () => {
     );
 
     expect(errorStatus).toBe(403);
+  });
+  // SCRUM-144: Search Jobs
+  it('should GET public search jobs with default zero-based pagination', () => {
+    let result: SearchJobsResponse | undefined;
+    service.searchJobs().subscribe(response => { result = response; });
+    const req = http.expectOne(r => r.method === 'GET' && r.url === `${environment.apiUrl}/Jobs`);
+    expect(req.request.params.get('page')).toBe('0');
+    expect(req.request.params.get('size')).toBe('10');
+    expect(req.request.params.has('keyword')).toBe(false);
+    const empty: SearchJobsResponse = { items: [], page: 0, size: 10, totalItems: 0 };
+    req.flush(empty);
+    expect(result).toEqual(empty);
+  });
+
+  it('should send all public search filters and trim text', () => {
+    service.searchJobs({
+      keyword: ' Angular ', location: ' Hanoi ', jobType: 'FULL_TIME',
+      experience: '1', salaryMin: 10000000, skillId: 'SK-01',
+      categoryId: 'CAT-01', companyId: 'COMP-01', page: 2, size: 5
+    }).subscribe();
+    const req = http.expectOne(r => r.method === 'GET' && r.url === `${environment.apiUrl}/Jobs`);
+    const p = req.request.params;
+    expect(p.get('keyword')).toBe('Angular');
+    expect(p.get('location')).toBe('Hanoi');
+    expect(p.get('jobType')).toBe('FULL_TIME');
+    expect(p.get('experience')).toBe('1');
+    expect(p.get('salaryMin')).toBe('10000000');
+    expect(p.get('skillId')).toBe('SK-01');
+    expect(p.get('categoryId')).toBe('CAT-01');
+    expect(p.get('companyId')).toBe('COMP-01');
+    expect(p.get('page')).toBe('2');
+    expect(p.get('size')).toBe('5');
+    req.flush({ items: [], page: 2, size: 5, totalItems: 0 });
+  });
+
+  it('should support public search zero-based pagination', () => {
+    service.searchJobs({ page: 0, size: 20 }).subscribe();
+    const req = http.expectOne(r => r.method === 'GET' && r.url === `${environment.apiUrl}/Jobs`);
+    expect(req.request.params.get('page')).toBe('0');
+    expect(req.request.params.get('size')).toBe('20');
+    req.flush({ items: [], page: 0, size: 20, totalItems: 0 });
+  });
+
+  it('should omit blank public search filters', () => {
+    service.searchJobs({ keyword: '  ', location: '', experience: ' ', skillId: ' ', categoryId: ' ', companyId: '' }).subscribe();
+    const req = http.expectOne(r => r.method === 'GET' && r.url === `${environment.apiUrl}/Jobs`);
+    for (const key of ['keyword', 'location', 'experience', 'skillId', 'categoryId', 'companyId']) {
+      expect(req.request.params.has(key)).toBe(false);
+    }
+    req.flush({ items: [], page: 0, size: 10, totalItems: 0 });
+  });
+
+  it('should propagate HTTP 400 from public search', () => {
+    let receivedStatus = 0;
+    service.searchJobs().subscribe({ error: (e: HttpErrorResponse) => { receivedStatus = e.status; } });
+    const req = http.expectOne(r => r.method === 'GET' && r.url === `${environment.apiUrl}/Jobs`);
+    req.flush({ title: 'Invalid search parameters' }, { status: 400, statusText: 'Bad Request' });
+    expect(receivedStatus).toBe(400);
   });
 });

@@ -85,6 +85,42 @@ export interface RecruiterJobsResponse {
   totalPages: number;
 }
 
+// SCRUM-144 - Public Search Jobs
+export interface SearchJobsFilters {
+  keyword?: string;
+  location?: string;
+  jobType?: JobType;
+  experience?: string;
+  salaryMin?: number;
+  skillId?: string;
+  categoryId?: string;
+  companyId?: string;
+  page?: number;  // zero-based for public search
+  size?: number;
+}
+
+export interface SearchJobItem {
+  jobId: string;
+  title: string;
+  companyId: string;
+  companyName: string;
+  categoryId: string;
+  location: string;
+  jobType: string;
+  experience: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  deadline: string;
+  createdAt: string;
+}
+
+export interface SearchJobsResponse {
+  items: SearchJobItem[];
+  page: number;
+  size: number;
+  totalItems: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -130,5 +166,22 @@ export class JobService {
       `${environment.apiUrl}/recruiter/jobs`,
       { params }
     );
+  }
+  // SCRUM-144 - GET /api/Jobs (public search, zero-based pagination)
+  searchJobs(filters: SearchJobsFilters = {}): Observable<SearchJobsResponse> {
+    let params = new HttpParams()
+      .set('page', String(filters.page ?? 0))
+      .set('size', String(filters.size ?? 10));
+
+    if (filters.keyword?.trim()) params = params.set('keyword', filters.keyword.trim());
+    if (filters.location?.trim()) params = params.set('location', filters.location.trim());
+    if (filters.jobType) params = params.set('jobType', filters.jobType);
+    if (filters.experience?.trim()) params = params.set('experience', filters.experience.trim());
+    if (filters.salaryMin != null) params = params.set('salaryMin', String(filters.salaryMin));
+    if (filters.skillId?.trim()) params = params.set('skillId', filters.skillId.trim());
+    if (filters.categoryId?.trim()) params = params.set('categoryId', filters.categoryId.trim());
+    if (filters.companyId?.trim()) params = params.set('companyId', filters.companyId.trim());
+
+    return this.http.get<SearchJobsResponse>(this.apiUrl, { params });
   }
 }
