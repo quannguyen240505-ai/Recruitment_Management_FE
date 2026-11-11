@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { vi } from 'vitest';
 
 import { Dashboard } from './dashboard';
 import { Auth } from '../../../core/services/auth';
 
-describe('Dashboard', () => {
+describe('Dashboard - SCRUM-135', () => {
     let component: Dashboard;
     let router: Router;
 

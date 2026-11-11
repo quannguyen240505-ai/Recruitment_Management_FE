@@ -1,6 +1,7 @@
+
 import { ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
 
@@ -14,14 +15,11 @@ import {
 describe('Login', () => {
     let component: Login;
     let fixture: ComponentFixture<Login>;
+    let router: Router;
 
     let authMock: {
         login: ReturnType<typeof vi.fn>;
         googleLogin: ReturnType<typeof vi.fn>;
-    };
-
-    let routerMock: {
-        navigate: ReturnType<typeof vi.fn>;
     };
 
     let googleMock: {
@@ -43,10 +41,6 @@ describe('Login', () => {
             googleLogin: vi.fn()
         };
 
-        routerMock = {
-            navigate: vi.fn()
-        };
-
         googleMock = {
             renderButton: vi.fn().mockResolvedValue(undefined)
         };
@@ -54,11 +48,20 @@ describe('Login', () => {
         await TestBed.configureTestingModule({
             imports: [Login],
             providers: [
+                provideRouter([]),
                 { provide: Auth, useValue: authMock },
-                { provide: Router, useValue: routerMock },
-                { provide: GoogleIdentity, useValue: googleMock }
+                {
+                    provide: GoogleIdentity,
+                    useValue: googleMock
+                }
             ]
         }).compileComponents();
+
+        // Use real Router to support RouterLink.
+        router = TestBed.inject(Router);
+
+        // Mock navigation only.
+        vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
         fixture = TestBed.createComponent(Login);
         component = fixture.componentInstance;
@@ -76,19 +79,22 @@ describe('Login', () => {
             response: GoogleCredentialResponse
         ) => void;
 
-        // Normal tests trigger one callback only.
         callback({ credential });
     }
 
+    // TEST 1: Component creation
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
+    // TEST 2: Invalid form
     it('should reject an invalid form', () => {
         component.submit();
+
         expect(authMock.login).not.toHaveBeenCalled();
     });
 
+    // TEST 3: Login success
     it('should login and navigate to dashboard', () => {
         authMock.login.mockReturnValue(of(response));
 
@@ -103,19 +109,24 @@ describe('Login', () => {
             username: 'thien_test_02',
             password: 'Thien@123'
         });
-        expect(routerMock.navigate)
+
+        expect(router.navigate)
             .toHaveBeenCalledWith(['/dashboard']);
     });
 
+    // TEST 4: Invalid credentials
     it('should handle invalid username/password', () => {
         authMock.login.mockReturnValue(
-            throwError(() => new HttpErrorResponse({ status: 401 }))
+            throwError(
+                () => new HttpErrorResponse({ status: 401 })
+            )
         );
 
         component.loginForm.setValue({
             username: 'wrong-user',
             password: 'wrong-password'
         });
+
         component.submit();
 
         expect(component.errorMessage).toBe(
@@ -123,6 +134,7 @@ describe('Login', () => {
         );
     });
 
+    // TEST 5: Google login success
     it('should login with Google successfully', async () => {
         authMock.googleLogin.mockReturnValue(of(response));
 
@@ -130,11 +142,14 @@ describe('Login', () => {
 
         expect(authMock.googleLogin)
             .toHaveBeenCalledWith('google-id-token');
-        expect(routerMock.navigate)
+
+        expect(router.navigate)
             .toHaveBeenCalledWith(['/dashboard']);
+
         expect(component.isGoogleLoading).toBe(false);
     });
 
+    // TEST 6-8: Google API errors
     it.each([
         [400, 'Thông tin đăng nhập Google không hợp lệ.'],
         [401, 'Không thể xác thực tài khoản Google.'],
@@ -143,26 +158,37 @@ describe('Login', () => {
         'should handle Google API error %i',
         async (status, expectedMessage) => {
             authMock.googleLogin.mockReturnValue(
-                throwError(() => new HttpErrorResponse({ status }))
+                throwError(
+                    () => new HttpErrorResponse({ status })
+                )
             );
 
             await triggerGoogleLogin('google-id-token');
 
-            expect(component.errorMessage).toBe(expectedMessage);
-            expect(component.isGoogleLoading).toBe(false);
-            expect(routerMock.navigate).not.toHaveBeenCalled();
+            expect(component.errorMessage)
+                .toBe(expectedMessage);
+
+            expect(component.isGoogleLoading)
+                .toBe(false);
+
+            expect(router.navigate)
+                .not.toHaveBeenCalled();
         }
     );
 
+    // TEST 9: Empty Google credential
     it('should reject an empty Google credential', async () => {
         await triggerGoogleLogin('');
 
-        expect(authMock.googleLogin).not.toHaveBeenCalled();
+        expect(authMock.googleLogin)
+            .not.toHaveBeenCalled();
+
         expect(component.errorMessage).toBe(
             'Không nhận được thông tin xác thực từ Google.'
         );
     });
 
+    // TEST 10: Google SDK failure
     it('should handle Google SDK loading failure', async () => {
         googleMock.renderButton.mockRejectedValue(
             new Error('Google SDK unavailable')
@@ -170,6 +196,7 @@ describe('Login', () => {
 
         component.googleButtonHost =
             new ElementRef(document.createElement('div'));
+
         await component.ngAfterViewInit();
 
         expect(component.errorMessage).toBe(
@@ -177,9 +204,13 @@ describe('Login', () => {
         );
     });
 
+    // TEST 11: Prevent duplicate requests
     it('should prevent duplicate Google Login requests', async () => {
         const pendingRequest = new Subject<typeof response>();
-        authMock.googleLogin.mockReturnValue(pendingRequest.asObservable());
+
+        authMock.googleLogin.mockReturnValue(
+            pendingRequest.asObservable()
+        );
 
         await triggerGoogleLogin('google-id-token');
 
@@ -187,18 +218,22 @@ describe('Login', () => {
             response: GoogleCredentialResponse
         ) => void;
 
-        // Simulate a second Google callback while the first request is pending.
         callback({ credential: 'google-id-token' });
 
-        expect(authMock.googleLogin).toHaveBeenCalledTimes(1);
+        expect(authMock.googleLogin)
+            .toHaveBeenCalledTimes(1);
+
         expect(component.isGoogleLoading).toBe(true);
-        expect(routerMock.navigate).not.toHaveBeenCalled();
+
+        expect(router.navigate)
+            .not.toHaveBeenCalled();
 
         pendingRequest.next(response);
         pendingRequest.complete();
 
         expect(component.isGoogleLoading).toBe(false);
-        expect(routerMock.navigate)
+
+        expect(router.navigate)
             .toHaveBeenCalledWith(['/dashboard']);
     });
 });
