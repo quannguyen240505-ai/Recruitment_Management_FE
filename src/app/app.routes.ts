@@ -1,25 +1,60 @@
+
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
+  // Login
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/login/login').then(m => m.Login)
+    loadComponent: () =>
+      import('./features/auth/login/login')
+        .then(m => m.Login)
   },
+
+  // SCRUM-119: Candidate Registration
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register')
+        .then(m => m.Register)
+  },
+
+  // Dashboard
   {
     path: 'dashboard',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/dashboard/dashboard/dashboard').then(m => m.Dashboard)
+    loadComponent: () =>
+      import('./features/dashboard/dashboard/dashboard')
+        .then(m => m.Dashboard)
   },
+
+  // Recruiter: Create Job
   {
     path: 'recruiter/jobs/create',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/jobs/create-job/create-job').then(m => m.CreateJob)
+    loadComponent: () =>
+      import('./features/jobs/create-job/create-job')
+        .then(m => m.CreateJob)
   },
+
+  // Public Job Details
   {
     path: 'jobs/:jobId',
-    loadComponent: () => import('./features/jobs/job-detail/job-detail').then(m => m.JobDetail)
+    loadComponent: () =>
+      import('./features/jobs/job-detail/job-detail')
+        .then(m => m.JobDetail)
   },
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
-  { path: '**', redirectTo: 'login' }
+
+  // Default Route
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login'
+  },
+
+  // Fallback Route
+  {
+    path: '**',
+    redirectTo: 'login'
+  }
 ];
