@@ -1,10 +1,8 @@
-
 import { provideHttpClient } from '@angular/common/http';
 import {
     HttpTestingController,
     provideHttpClientTesting
 } from '@angular/common/http/testing';
-
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
@@ -44,7 +42,6 @@ describe('Auth', () => {
     // TEST 2: Logout
     it('should remove access token when logout', () => {
         auth.setAccessToken('test-token');
-
         auth.logout();
 
         expect(auth.getAccessToken()).toBeNull();
@@ -57,7 +54,7 @@ describe('Auth', () => {
         expect(auth.isAuthenticated()).toBe(false);
     });
 
-    // TEST 4: Login thành công
+    // TEST 4: Login thường thành công
     it('should login successfully and store JWT and user information', () => {
         const loginRequest = {
             username: 'thien_test_02',
@@ -91,7 +88,6 @@ describe('Auth', () => {
         expect(result).toEqual(mockResponse);
         expect(auth.getAccessToken()).toBe('jwt-from-backend');
         expect(auth.isAuthenticated()).toBe(true);
-
         expect(
             JSON.parse(localStorage.getItem('auth_user')!)
         ).toEqual({
@@ -101,7 +97,7 @@ describe('Auth', () => {
         });
     });
 
-    // TEST 5: Login thất bại - HTTP 401
+    // TEST 5: Login thường thất bại
     it('should not store JWT when login fails with 401', () => {
         let errorStatus = 0;
 
@@ -122,10 +118,7 @@ describe('Auth', () => {
 
         request.flush(
             { message: 'Invalid credentials' },
-            {
-                status: 401,
-                statusText: 'Unauthorized'
-            }
+            { status: 401, statusText: 'Unauthorized' }
         );
 
         expect(errorStatus).toBe(401);
@@ -156,18 +149,13 @@ describe('Auth', () => {
         );
 
         expect(request.request.method).toBe('POST');
-        expect(request.request.body).toEqual({
-            idToken: 'google-id-token'
-        });
+        expect(request.request.body).toEqual({ idToken: 'google-id-token' });
 
         request.flush(mockResponse);
 
         expect(result).toEqual(mockResponse);
-        expect(auth.getAccessToken()).toBe(
-            'google-jwt-from-backend'
-        );
+        expect(auth.getAccessToken()).toBe('google-jwt-from-backend');
         expect(auth.isAuthenticated()).toBe(true);
-
         expect(
             JSON.parse(localStorage.getItem('auth_user')!)
         ).toEqual({
@@ -193,10 +181,7 @@ describe('Auth', () => {
 
         request.flush(
             { message: 'Google account conflict' },
-            {
-                status: 409,
-                statusText: 'Conflict'
-            }
+            { status: 409, statusText: 'Conflict' }
         );
 
         expect(errorStatus).toBe(409);
@@ -205,7 +190,92 @@ describe('Auth', () => {
         expect(auth.isAuthenticated()).toBe(false);
     });
 
-    // TEST 8: Change Password thành công - HTTP 204
+    // TEST 8: Register thành công - HTTP 201
+    it('should register successfully without storing JWT', () => {
+        const registerRequest = {
+            fullName: 'Candidate Test',
+            username: 'candidate_test_119',
+            email: 'candidate119@example.com',
+            phoneNumber: '0912345678',
+            password: 'Test@12345',
+            confirmPassword: 'Test@12345'
+        };
+
+        const mockResponse = {
+            userId: 'user-119',
+            username: 'candidate_test_119',
+            email: 'candidate119@example.com',
+            fullName: 'Candidate Test',
+            role: 'CANDIDATE'
+        };
+
+        let result: typeof mockResponse | undefined;
+
+        auth.register(registerRequest).subscribe(response => {
+            result = response;
+        });
+
+        const request = httpMock.expectOne(
+            `${environment.apiUrl}/auth/register`
+        );
+
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual(registerRequest);
+
+        request.flush(mockResponse, {
+            status: 201,
+            statusText: 'Created'
+        });
+
+        expect(result).toEqual(mockResponse);
+        expect(auth.getAccessToken()).toBeNull();
+        expect(localStorage.getItem('auth_user')).toBeNull();
+        expect(auth.isAuthenticated()).toBe(false);
+    });
+
+    // TEST 9-10: Register trả lỗi HTTP 400 hoặc 409
+    it.each([
+        [400, 'Bad Request'],
+        [409, 'Conflict']
+    ])(
+        'should handle Register HTTP error %i',
+        (status, statusText) => {
+            const registerRequest = {
+                fullName: 'Candidate Test',
+                username: 'candidate_test_119',
+                email: 'candidate119@example.com',
+                phoneNumber: '0912345678',
+                password: 'Test@12345',
+                confirmPassword: 'Test@12345'
+            };
+
+            let receivedStatus: number | null = null;
+
+            auth.register(registerRequest).subscribe({
+                error: error => {
+                    receivedStatus = error.status;
+                }
+            });
+
+            const request = httpMock.expectOne(
+                `${environment.apiUrl}/auth/register`
+            );
+
+            expect(request.request.method).toBe('POST');
+
+            request.flush(
+                { title: 'Registration failed' },
+                { status, statusText }
+            );
+
+            expect(receivedStatus).toBe(status);
+            expect(auth.getAccessToken()).toBeNull();
+            expect(localStorage.getItem('auth_user')).toBeNull();
+            expect(auth.isAuthenticated()).toBe(false);
+        }
+    );
+
+    // TEST 11: Change Password thành công - HTTP 204
     it('should send PUT change-password request and handle 204', () => {
         const payload = {
             currentPassword: 'OldPass1!',
@@ -236,35 +306,41 @@ describe('Auth', () => {
         expect(succeeded).toBe(true);
     });
 
-    // TEST 9: Change Password thất bại - HTTP 400
-    it('should propagate HTTP 400 from change-password', () => {
-        let errorStatus = 0;
+    // TEST 12-14: Change Password lỗi - HTTP 400 / 401 / 409
+    it.each([
+        [400, 'Bad Request'],
+        [401, 'Unauthorized'],
+        [409, 'Conflict']
+    ])(
+        'should propagate Change Password HTTP error %i',
+        (status, statusText) => {
+            const payload = {
+                currentPassword: 'OldPass1!',
+                newPassword: 'NewPass2!',
+                confirmPassword: 'NewPass2!'
+            };
 
-        auth.changePassword({
-            currentPassword: 'WrongPass1!',
-            newPassword: 'NewPass2!',
-            confirmPassword: 'NewPass2!'
-        }).subscribe({
-            error: error => {
-                errorStatus = error.status;
-            }
-        });
+            let receivedStatus = 0;
 
-        const request = httpMock.expectOne(
-            `${environment.apiUrl}/auth/change-password`
-        );
+            auth.changePassword(payload).subscribe({
+                error: error => {
+                    receivedStatus = error.status;
+                }
+            });
 
-        expect(request.request.method).toBe('PUT');
+            const request = httpMock.expectOne(
+                `${environment.apiUrl}/auth/change-password`
+            );
 
-        request.flush(
-            { detail: 'Mật khẩu hiện tại không chính xác.' },
-            {
-                status: 400,
-                statusText: 'Bad Request'
-            }
-        );
+            expect(request.request.method).toBe('PUT');
+            expect(request.request.body).toEqual(payload);
 
-        expect(errorStatus).toBe(400);
-    });
+            request.flush(
+                { title: 'Change password failed' },
+                { status, statusText }
+            );
 
+            expect(receivedStatus).toBe(status);
+        }
+    );
 });

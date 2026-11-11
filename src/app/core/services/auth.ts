@@ -3,11 +3,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-
 import {
   GoogleLoginRequest,
   LoginRequest,
   LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
   ChangePasswordRequest
 } from '../models/auth.models';
 
@@ -56,7 +57,17 @@ export class Auth {
       );
   }
 
-  // 3. CHANGE PASSWORD - SCRUM-135
+  // 3. REGISTER - SCRUM-119
+  register(
+    request: RegisterRequest
+  ): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(
+      `${environment.apiUrl}/auth/register`,
+      request
+    );
+  }
+
+  // 4. CHANGE PASSWORD - SCRUM-135
   changePassword(
     request: ChangePasswordRequest
   ): Observable<void> {
@@ -66,7 +77,7 @@ export class Auth {
     );
   }
 
-  // 4. SAVE SESSION
+  // 5. SAVE SESSION
   private saveSession(response: LoginResponse): void {
     this.setAccessToken(response.accessToken);
 
@@ -80,7 +91,7 @@ export class Auth {
     );
   }
 
-  // 5. TOKEN MANAGEMENT
+  // 6. TOKEN MANAGEMENT
   setAccessToken(token: string): void {
     localStorage.setItem(this.accessTokenKey, token);
     this.isAuthenticated.set(true);
@@ -94,7 +105,7 @@ export class Auth {
     return !!this.getAccessToken();
   }
 
-  // 6. LOGOUT
+  // 7. LOGOUT
   clearSession(): void {
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.userKey);
