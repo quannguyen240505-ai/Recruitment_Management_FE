@@ -1,0 +1,372 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    font-family: Inter, system-ui, sans-serif;
+    color: #0f172a;
+    background: #f8fafc;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px max(24px, calc((100vw - 1200px) / 2));
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #0f172a;
+    text-decoration: none;
+}
+
+.brand-icon,
+.company-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: #0f172a;
+    color: #fff;
+    font-weight: 700;
+}
+
+.brand strong,
+.brand small {
+    display: block;
+}
+
+.brand small {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.login-link,
+.text-button {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.text-button {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.content {
+    max-width: 1200px;
+    margin: auto;
+    padding: 36px 24px 80px;
+}
+
+.hero {
+    margin-bottom: 30px;
+}
+
+.eyebrow {
+    color: #2563eb;
+    letter-spacing: 1px;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.hero h1 {
+    margin: 12px 0;
+    font-size: 32px;
+}
+
+.hero p,
+.results-header p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.filter-card,
+.job-card,
+.state {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.filter-card {
+    padding: 24px;
+}
+
+.section-heading,
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+h2 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.filter-card form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 22px;
+}
+
+.filter-card label {
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.filter-card input,
+.filter-card select {
+    width: 100%;
+    padding: 11px 12px;
+    margin-bottom: 20px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+    color: #0f172a;
+}
+
+.filter-card input:focus,
+.filter-card select:focus {
+    outline: 2px solid #bfdbfe;
+    border-color: #2563eb;
+}
+
+.primary-button {
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 18px;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.primary-button:disabled {
+    opacity: .6;
+}
+
+.results-header {
+    margin-bottom: 22px;
+}
+
+.results-header p {
+    margin-bottom: 0;
+}
+
+.refresh-button,
+.pagination-buttons button {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.refresh-button:disabled,
+.pagination-buttons button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.job-list {
+    display: grid;
+    gap: 16px;
+}
+
+.job-card {
+    padding: 24px;
+}
+
+.job-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.company-icon {
+    flex-shrink: 0;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.job-info {
+    min-width: 0;
+}
+
+.job-info h3 {
+    margin: 0 0 7px;
+    font-size: 18px;
+}
+
+.job-info h3 a {
+    color: #0f172a;
+    text-decoration: none;
+}
+
+.job-info h3 a:hover {
+    color: #2563eb;
+}
+
+.job-info p,
+.job-bottom p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 20px 0;
+}
+
+.job-tags span {
+    border-radius: 7px;
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.job-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 18px;
+}
+
+.job-bottom strong {
+    font-size: 14px;
+}
+
+.detail-link {
+    flex-shrink: 0;
+    background: #2563eb;
+    padding: 11px 16px;
+    border-radius: 8px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.state {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 65px 20px;
+    text-align: center;
+}
+
+.state h3 {
+    margin: 15px 0 5px;
+}
+
+.state p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.state .primary-button {
+    margin-top: 15px;
+}
+
+.state-icon {
+    display: grid;
+    place-items: center;
+    height: 55px;
+    width: 55px;
+    background: #eff6ff;
+    border-radius: 15px;
+    color: #2563eb;
+    font-size: 26px;
+}
+
+.spinner {
+    height: 36px;
+    width: 36px;
+    border: 3px solid #dbeafe;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 2px;
+    gap: 12px;
+}
+
+.pagination p {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 9px;
+}
+
+@media (max-width: 800px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .content {
+        padding: 25px 15px 50px;
+    }
+
+    .hero h1 {
+        font-size: 25px;
+    }
+
+    .job-bottom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detail-link {
+        text-align: center;
+    }
+}
