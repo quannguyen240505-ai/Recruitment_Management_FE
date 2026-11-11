@@ -11,10 +11,12 @@ export interface LoginResponse {
     username: string;
     role: string;
 }
+
 export interface GoogleLoginRequest {
     idToken: string;
 }
 
+// SCRUM-119: Candidate Registration
 export interface RegisterRequest {
     fullName: string;
     username: string;
@@ -30,4 +32,11 @@ export interface RegisterResponse {
     email: string;
     fullName: string;
     role: string;
+}
+
+// SCRUM-135: Change Password
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
 }

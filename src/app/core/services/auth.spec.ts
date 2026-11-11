@@ -1,4 +1,3 @@
-
 import { provideHttpClient } from '@angular/common/http';
 import {
     HttpTestingController,
@@ -89,7 +88,6 @@ describe('Auth', () => {
         expect(result).toEqual(mockResponse);
         expect(auth.getAccessToken()).toBe('jwt-from-backend');
         expect(auth.isAuthenticated()).toBe(true);
-
         expect(
             JSON.parse(localStorage.getItem('auth_user')!)
         ).toEqual({
@@ -120,10 +118,7 @@ describe('Auth', () => {
 
         request.flush(
             { message: 'Invalid credentials' },
-            {
-                status: 401,
-                statusText: 'Unauthorized'
-            }
+            { status: 401, statusText: 'Unauthorized' }
         );
 
         expect(errorStatus).toBe(401);
@@ -154,18 +149,13 @@ describe('Auth', () => {
         );
 
         expect(request.request.method).toBe('POST');
-        expect(request.request.body).toEqual({
-            idToken: 'google-id-token'
-        });
+        expect(request.request.body).toEqual({ idToken: 'google-id-token' });
 
         request.flush(mockResponse);
 
         expect(result).toEqual(mockResponse);
-        expect(auth.getAccessToken()).toBe(
-            'google-jwt-from-backend'
-        );
+        expect(auth.getAccessToken()).toBe('google-jwt-from-backend');
         expect(auth.isAuthenticated()).toBe(true);
-
         expect(
             JSON.parse(localStorage.getItem('auth_user')!)
         ).toEqual({
@@ -191,10 +181,7 @@ describe('Auth', () => {
 
         request.flush(
             { message: 'Google account conflict' },
-            {
-                status: 409,
-                statusText: 'Conflict'
-            }
+            { status: 409, statusText: 'Conflict' }
         );
 
         expect(errorStatus).toBe(409);
@@ -288,4 +275,72 @@ describe('Auth', () => {
         }
     );
 
+    // TEST 11: Change Password thành công - HTTP 204
+    it('should send PUT change-password request and handle 204', () => {
+        const payload = {
+            currentPassword: 'OldPass1!',
+            newPassword: 'NewPass2!',
+            confirmPassword: 'NewPass2!'
+        };
+
+        let succeeded = false;
+
+        auth.changePassword(payload).subscribe({
+            next: () => {
+                succeeded = true;
+            }
+        });
+
+        const request = httpMock.expectOne(
+            `${environment.apiUrl}/auth/change-password`
+        );
+
+        expect(request.request.method).toBe('PUT');
+        expect(request.request.body).toEqual(payload);
+
+        request.flush(null, {
+            status: 204,
+            statusText: 'No Content'
+        });
+
+        expect(succeeded).toBe(true);
+    });
+
+    // TEST 12-14: Change Password lỗi - HTTP 400 / 401 / 409
+    it.each([
+        [400, 'Bad Request'],
+        [401, 'Unauthorized'],
+        [409, 'Conflict']
+    ])(
+        'should propagate Change Password HTTP error %i',
+        (status, statusText) => {
+            const payload = {
+                currentPassword: 'OldPass1!',
+                newPassword: 'NewPass2!',
+                confirmPassword: 'NewPass2!'
+            };
+
+            let receivedStatus = 0;
+
+            auth.changePassword(payload).subscribe({
+                error: error => {
+                    receivedStatus = error.status;
+                }
+            });
+
+            const request = httpMock.expectOne(
+                `${environment.apiUrl}/auth/change-password`
+            );
+
+            expect(request.request.method).toBe('PUT');
+            expect(request.request.body).toEqual(payload);
+
+            request.flush(
+                { title: 'Change password failed' },
+                { status, statusText }
+            );
+
+            expect(receivedStatus).toBe(status);
+        }
+    );
 });

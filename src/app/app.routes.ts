@@ -1,4 +1,3 @@
-
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 
@@ -17,6 +16,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/register/register')
         .then(m => m.Register)
+  },
+
+  // SCRUM-135: Change Password
+  {
+    path: 'change-password',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/auth/change-password/change-password')
+        .then(m => m.ChangePassword)
   },
 
   // Dashboard
