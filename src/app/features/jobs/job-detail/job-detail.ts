@@ -1,4 +1,3 @@
-
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
@@ -64,7 +63,7 @@ export class JobDetail {
             catchError((err: HttpErrorResponse) => {
               if (err.status === 404) {
                 this.error.set(
-                  'Không tìm thấy tin tuyển dụng hoặc tin đã đóng, hết hạn.'
+                  'Không tìm thấy hoặc không thể xem công việc này.'
                 );
               } else if (err.status === 0) {
                 this.error.set(

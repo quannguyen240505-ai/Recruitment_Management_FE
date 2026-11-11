@@ -138,7 +138,7 @@ describe('JobDetail - SCRUM-147', () => {
         expect(component.loading()).toBe(false);
         expect(component.job()).toBeNull();
         expect(component.error()).toContain(
-            'Không tìm thấy tin tuyển dụng'
+            'Không tìm thấy hoặc không thể xem công việc này.'
         );
     });
 
