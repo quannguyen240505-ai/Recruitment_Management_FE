@@ -3,32 +3,58 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
-    {
-        path: 'login',
-        loadComponent: () =>
-            import('./features/auth/login/login')
-                .then(m => m.Login)
-    },
-    {
-        path: 'register',
-        loadComponent: () =>
-            import('./features/auth/register/register')
-                .then(m => m.Register)
-    },
-    {
-        path: 'dashboard',
-        canActivate: [authGuard],
-        loadComponent: () =>
-            import('./features/dashboard/dashboard/dashboard')
-                .then(m => m.Dashboard)
-    },
-    {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'login'
-    },
-    {
-        path: '**',
-        redirectTo: 'login'
-    }
+  // Login
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login')
+        .then(m => m.Login)
+  },
+
+  // SCRUM-119: Candidate Registration
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register')
+        .then(m => m.Register)
+  },
+
+  // Dashboard
+  {
+    path: 'dashboard',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/dashboard/dashboard/dashboard')
+        .then(m => m.Dashboard)
+  },
+
+  // Recruiter: Create Job
+  {
+    path: 'recruiter/jobs/create',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/jobs/create-job/create-job')
+        .then(m => m.CreateJob)
+  },
+
+  // Public Job Details
+  {
+    path: 'jobs/:jobId',
+    loadComponent: () =>
+      import('./features/jobs/job-detail/job-detail')
+        .then(m => m.JobDetail)
+  },
+
+  // Default Route
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login'
+  },
+
+  // Fallback Route
+  {
+    path: '**',
+    redirectTo: 'login'
+  }
 ];
