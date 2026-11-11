@@ -1,11 +1,341 @@
-:host { display: block; min-height: 100vh; background: #f8fafc; color: #0f172a; font-family: Inter, system-ui, sans-serif; }
-.detail-page { max-width: 980px; padding: 40px 24px; margin: 0 auto; }
-.link { color: #2563eb; text-decoration: none; font-size: 14px; }
-.detail-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 24px; padding: 32px; }
-h1 { font-size: 32px; margin: 10px 0; } h2 { font-size: 18px; margin-top: 28px; }
-.status { font-size: 12px; font-weight: 600; border-radius: 20px; padding: 5px 10px; color: #166534; background: #dcfce7; }
-.subheading { color: #64748b; }
-.stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 22px 0; }
-.stats span { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 13px; }
-.paragraph { white-space: pre-wrap; line-height: 1.7; }
-.error { color: #b91c1c; }
+:host {
+    display: block;
+    min-height: 100vh;
+    font-family: Inter, system-ui, sans-serif;
+    color: #0f172a;
+    background: #f8fafc;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.detail-page {
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 32px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #0f172a;
+    text-decoration: none;
+}
+
+.brand-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: #0f172a;
+    color: white;
+    font-weight: 700;
+}
+
+.brand strong,
+.brand small {
+    display: block;
+}
+
+.brand small {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.back-link {
+    color: #2563eb;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.breadcrumb {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.job-header,
+.main-card,
+.side-card,
+.state-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+}
+
+.job-header {
+    padding: 32px;
+    margin-bottom: 24px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-open {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+h1 {
+    margin: 18px 0 12px;
+    font-size: 32px;
+    letter-spacing: -.5px;
+}
+
+.company-subtitle {
+    color: #64748b;
+    font-size: 15px;
+}
+
+.job-tags,
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.job-tags {
+    margin-top: 24px;
+}
+
+.job-tags span,
+.skill-tag {
+    padding: 9px 13px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.main-card {
+    padding: 28px 32px;
+}
+
+.content-section+.content-section {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #f1f5f9;
+}
+
+h2 {
+    margin: 0 0 20px;
+    font-size: 19px;
+}
+
+.information-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 23px;
+}
+
+.info-item,
+.company-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.info-item span,
+.company-field span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.info-item strong,
+.company-field strong {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.description {
+    margin: 0;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.side-column {
+    display: grid;
+    gap: 20px;
+}
+
+.side-card {
+    padding: 26px;
+}
+
+.side-card h2 {
+    margin: 15px 0 10px;
+    font-size: 17px;
+}
+
+.company-avatar {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 13px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.company-field {
+    margin-top: 19px;
+}
+
+.company-field p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.company-field a {
+    color: #2563eb;
+    font-size: 13px;
+}
+
+.job-id {
+    color: #64748b;
+    word-break: break-all;
+}
+
+.muted {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.state-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 75px 24px;
+    text-align: center;
+}
+
+.state-card h2 {
+    margin: 18px 0 8px;
+}
+
+.state-card p {
+    max-width: 450px;
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.state-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 28px;
+}
+
+.state-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.state-actions button,
+.state-actions a {
+    padding: 12px 19px;
+    border: 0;
+    border-radius: 9px;
+    background: #2563eb;
+    color: white;
+    font: 600 13px Inter, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.state-actions a {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #dbeafe;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 800px) {
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 16px;
+    }
+
+    .job-header,
+    .main-card,
+    .side-card {
+        padding: 22px 18px;
+    }
+
+    h1 {
+        font-size: 26px;
+    }
+
+    .information-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        gap: 14px;
+    }
+}
