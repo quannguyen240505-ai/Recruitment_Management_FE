@@ -1,4 +1,3 @@
-
 import { ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -236,4 +235,36 @@ describe('Login', () => {
         expect(router.navigate)
             .toHaveBeenCalledWith(['/dashboard']);
     });
+
+    it('should render login error after async HTTP 401', async () => {
+    const pending = new Subject<never>();
+
+    authMock.login.mockReturnValue(
+        pending.asObservable()
+    );
+
+    fixture.detectChanges();
+
+    component.loginForm.setValue({
+        username: 'unknown-user',
+        password: 'WrongPassword123'
+    });
+
+    component.submit();
+
+    pending.error(
+        new HttpErrorResponse({ status: 401 })
+    );
+
+    await fixture.whenStable();
+
+    const errorElement =
+        fixture.nativeElement.querySelector('.login-error');
+
+    expect(errorElement).not.toBeNull();
+    expect(errorElement.textContent).toContain(
+        'Tên đăng nhập hoặc mật khẩu không chính xác.'
+    );
+    });
+
 });
