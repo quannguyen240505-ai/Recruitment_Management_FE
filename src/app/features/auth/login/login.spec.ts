@@ -152,7 +152,7 @@ describe('Login', () => {
     it.each([
         [400, 'Thông tin đăng nhập Google không hợp lệ.'],
         [401, 'Không thể xác thực tài khoản Google.'],
-        [409, 'Email Google này đã được sử dụng bởi tài khoản khác.']
+        [409, 'Không thể liên kết tài khoản Google do xung đột liên kết tài khoản.']
     ])(
         'should handle Google API error %i',
         async (status, expectedMessage) => {
@@ -237,34 +237,59 @@ describe('Login', () => {
     });
 
     it('should render login error after async HTTP 401', async () => {
-    const pending = new Subject<never>();
+        const pending = new Subject<never>();
 
-    authMock.login.mockReturnValue(
-        pending.asObservable()
-    );
+        authMock.login.mockReturnValue(
+            pending.asObservable()
+        );
 
-    fixture.detectChanges();
+        fixture.detectChanges();
 
-    component.loginForm.setValue({
-        username: 'unknown-user',
-        password: 'WrongPassword123'
+        component.loginForm.setValue({
+            username: 'unknown-user',
+            password: 'WrongPassword123'
+        });
+
+        component.submit();
+
+        pending.error(
+            new HttpErrorResponse({ status: 401 })
+        );
+
+        await fixture.whenStable();
+
+        const errorElement =
+            fixture.nativeElement.querySelector('.login-error');
+
+        expect(errorElement).not.toBeNull();
+        expect(errorElement.textContent).toContain(
+            'Tên đăng nhập hoặc mật khẩu không chính xác.'
+        );
     });
 
-    component.submit();
+    it('SCRUM-153: should navigate after linked local Google Login', async () => {
+        const localAccountResponse = {
+            ...response,
+            userId: 'local-user-001',
+            username: 'existing-recruiter',
+            role: 'RECRUITER'
+        };
 
-    pending.error(
-        new HttpErrorResponse({ status: 401 })
-    );
+        authMock.googleLogin.mockReturnValue(
+            of(localAccountResponse)
+        );
 
-    await fixture.whenStable();
+        await triggerGoogleLogin('google-id-token');
 
-    const errorElement =
-        fixture.nativeElement.querySelector('.login-error');
+        expect(authMock.googleLogin)
+            .toHaveBeenCalledWith('google-id-token');
 
-    expect(errorElement).not.toBeNull();
-    expect(errorElement.textContent).toContain(
-        'Tên đăng nhập hoặc mật khẩu không chính xác.'
-    );
+        expect(component.errorMessage).toBe('');
+        expect(component.isGoogleLoading).toBe(false);
+
+        expect(router.navigate)
+            .toHaveBeenCalledWith(['/dashboard']);
     });
+
 
 });
