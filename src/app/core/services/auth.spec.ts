@@ -343,4 +343,42 @@ describe('Auth', () => {
             expect(receivedStatus).toBe(status);
         }
     );
+
+    it('SCRUM-153: should preserve local UserId and Role on Google Login', () => {
+        const existingAccount = {
+            accessToken: 'jwt-existing-local',
+            tokenType: 'Bearer',
+            expiresAtUtc: '2026-11-16T13:00:00Z',
+            userId: 'local-user-001',
+            username: 'existing-recruiter',
+            role: 'RECRUITER'
+        };
+
+        auth.googleLogin('verified-google-token').subscribe();
+
+        const request = httpMock.expectOne(
+            `${environment.apiUrl}/auth/google-login`
+        );
+
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({
+            idToken: 'verified-google-token'
+        });
+
+        request.flush(existingAccount);
+
+        expect(auth.getAccessToken())
+            .toBe('jwt-existing-local');
+
+        expect(
+            JSON.parse(localStorage.getItem('auth_user')!)
+        ).toEqual({
+            userId: 'local-user-001',
+            username: 'existing-recruiter',
+            role: 'RECRUITER'
+        });
+
+        expect(auth.isAuthenticated()).toBe(true);
+    });
+
 });

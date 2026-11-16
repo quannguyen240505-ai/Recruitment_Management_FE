@@ -101,7 +101,7 @@ export class Login implements AfterViewInit {
 
         if (error.status === 409) {
           this.errorMessage =
-            'Email Google này đã được sử dụng bởi tài khoản khác.';
+            'Không thể liên kết tài khoản Google do xung đột liên kết tài khoản.';
         } else if (error.status === 401) {
           this.errorMessage =
             'Không thể xác thực tài khoản Google.';
@@ -119,38 +119,38 @@ export class Login implements AfterViewInit {
   }
 
 
-submit(): void {
-  if (this.loginForm.invalid || this.isLoading) {
-    this.loginForm.markAllAsTouched();
-    return;
-  }
-
-  this.isLoading = true;
-  this.errorMessage = '';
-
-  this.auth.login(this.loginForm.getRawValue()).subscribe({
-    next: () => {
-      this.isLoading = false;
-      this.cdr.markForCheck();
-      void this.router.navigate(['/dashboard']);
-    },
-
-    error: (error: HttpErrorResponse) => {
-      this.isLoading = false;
-
-      if (error.status === 401) {
-        this.errorMessage =
-          'Tên đăng nhập hoặc mật khẩu không chính xác.';
-      } else if (error.status === 400) {
-        this.errorMessage =
-          'Vui lòng kiểm tra lại thông tin đăng nhập.';
-      } else {
-        this.errorMessage =
-          'Không thể kết nối đến máy chủ. Vui lòng thử lại.';
-      }
-
-      this.cdr.markForCheck();
+  submit(): void {
+    if (this.loginForm.invalid || this.isLoading) {
+      this.loginForm.markAllAsTouched();
+      return;
     }
-  });
-}
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.auth.login(this.loginForm.getRawValue()).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+        void this.router.navigate(['/dashboard']);
+      },
+
+      error: (error: HttpErrorResponse) => {
+        this.isLoading = false;
+
+        if (error.status === 401) {
+          this.errorMessage =
+            'Tên đăng nhập hoặc mật khẩu không chính xác.';
+        } else if (error.status === 400) {
+          this.errorMessage =
+            'Vui lòng kiểm tra lại thông tin đăng nhập.';
+        } else {
+          this.errorMessage =
+            'Không thể kết nối đến máy chủ. Vui lòng thử lại.';
+        }
+
+        this.cdr.markForCheck();
+      }
+    });
+  }
 }
