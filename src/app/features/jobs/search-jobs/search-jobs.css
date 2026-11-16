@@ -63,6 +63,14 @@ select {
     font-size: 13px;
 }
 
+.auth-action {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+
 .text-button {
     background: transparent;
     border: 0;

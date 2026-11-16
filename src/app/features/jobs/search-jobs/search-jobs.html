@@ -7,7 +7,17 @@
                 <small>Recruitment Platform</small>
             </span>
         </a>
-        <a routerLink="/login" class="login-link">Đăng nhập</a>
+
+        @if (auth.isAuthenticated()) {
+        <button type="button" class="login-link auth-action" (click)="auth.logout()">
+            Đăng xuất
+        </button>
+        } @else {
+        <a routerLink="/login" class="login-link">
+            Đăng nhập
+        </a>
+        }
+
     </header>
 
     <main class="content">
