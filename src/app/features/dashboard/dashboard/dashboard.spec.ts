@@ -1,41 +1,43 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Dashboard } from './dashboard';
 import { Auth } from '../../../core/services/auth';
 
-describe('Dashboard - SCRUM-135', () => {
+describe('Dashboard - SCRUM-154', () => {
     let component: Dashboard;
+    let fixture: ComponentFixture<Dashboard>;
     let router: Router;
 
     const authMock = {
-        logout: vi.fn()
+        logout: vi.fn(),
+        hasAccessToken: vi.fn(),
+        getCurrentRole: vi.fn()
     };
 
     beforeEach(async () => {
-        vi.clearAllMocks();
+        vi.resetAllMocks();
+
+        authMock.hasAccessToken.mockReturnValue(true);
+        authMock.getCurrentRole.mockReturnValue('CANDIDATE');
 
         await TestBed.configureTestingModule({
             imports: [Dashboard],
             providers: [
                 provideRouter([]),
-                {
-                    provide: Auth,
-                    useValue: authMock
-                }
+                { provide: Auth, useValue: authMock }
             ]
         }).compileComponents();
 
         router = TestBed.inject(Router);
-
-        const fixture = TestBed.createComponent(Dashboard);
+        fixture = TestBed.createComponent(Dashboard);
         component = fixture.componentInstance;
-
-        fixture.detectChanges();
     });
 
     it('should create dashboard', () => {
+        fixture.detectChanges();
+
         expect(component).toBeTruthy();
     });
 
@@ -47,6 +49,47 @@ describe('Dashboard - SCRUM-135', () => {
         component.logout();
 
         expect(authMock.logout).toHaveBeenCalledOnce();
-        expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+        expect(navigateSpy)
+            .toHaveBeenCalledWith(['/login']);
+    });
+
+    it('hides Recruiter menu for Candidate', () => {
+        fixture.detectChanges();
+
+        const content = fixture.nativeElement.textContent;
+
+        expect(content)
+            .not.toContain('Quản lý tin tuyển dụng');
+
+        expect(content)
+            .not.toContain('Tạo tin tuyển dụng');
+    });
+
+    it('shows Recruiter menu for Recruiter', () => {
+        authMock.getCurrentRole.mockReturnValue('RECRUITER');
+
+        fixture.detectChanges();
+
+        const content = fixture.nativeElement.textContent;
+
+        expect(content)
+            .toContain('Quản lý tin tuyển dụng');
+
+        expect(content)
+            .toContain('Tạo tin tuyển dụng');
+    });
+
+    it('hides Recruiter menu when unauthenticated', () => {
+        authMock.hasAccessToken.mockReturnValue(false);
+
+        fixture.detectChanges();
+
+        const content = fixture.nativeElement.textContent;
+
+        expect(content)
+            .not.toContain('Quản lý tin tuyển dụng');
+
+        expect(content)
+            .not.toContain('Tạo tin tuyển dụng');
     });
 });

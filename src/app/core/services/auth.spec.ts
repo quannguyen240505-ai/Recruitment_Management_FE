@@ -381,4 +381,24 @@ describe('Auth', () => {
         expect(auth.isAuthenticated()).toBe(true);
     });
 
+    it('SCRUM-154: reads the current role from session', () => {
+        localStorage.setItem(
+            'auth_user',
+            JSON.stringify({
+                userId: 'user-001',
+                username: 'recruiter-test',
+                role: 'RECRUITER'
+            })
+        );
+
+        expect(auth.getCurrentRole()).toBe('RECRUITER');
+    });
+
+    it('SCRUM-154: handles invalid session data', () => {
+        localStorage.setItem('auth_user', 'invalid-json');
+
+        expect(auth.getCurrentRole()).toBeNull();
+    });
+
+
 });
