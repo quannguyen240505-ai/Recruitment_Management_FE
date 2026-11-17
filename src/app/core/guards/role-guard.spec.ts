@@ -83,4 +83,23 @@ describe('Role Guard - SCRUM-154', () => {
         expect(route).toBeDefined();
         expect(route?.canActivate).toContain(roleGuard);
     });
+
+    it('SCRUM-154: unknown routes redirect to Dashboard', () => {
+        const fallbackRoute = routes.find(
+            route => route.path === '**'
+        );
+
+        expect(fallbackRoute).toBeDefined();
+        expect(fallbackRoute?.redirectTo).toBe('/dashboard');
+    });
+
+    it('SCRUM-154: Dashboard remains protected', () => {
+        const dashboardRoute = routes.find(
+            route => route.path === 'dashboard'
+        );
+
+        expect(dashboardRoute).toBeDefined();
+        expect(dashboardRoute?.canActivate).toBeDefined();
+    });
+
 });

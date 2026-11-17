@@ -76,9 +76,11 @@ export const routes: Routes = [
     redirectTo: 'login'
   },
 
-  // Fallback
+  // SCRUM-154: Unknown URL redirects to Dashboard.
+  // The existing authGuard on Dashboard redirects
+  // unauthenticated users to Login.
   {
     path: '**',
-    redirectTo: 'login'
+    redirectTo: '/dashboard'
   }
 ];
