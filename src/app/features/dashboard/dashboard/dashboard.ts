@@ -14,6 +14,13 @@ export class Dashboard {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
 
+  // SCRUM-154: Chỉ hiển thị menu Recruiter
+  // cho tài khoản có Role RECRUITER
+  get isRecruiter(): boolean {
+    return this.auth.hasAccessToken() &&
+      this.auth.getCurrentRole() === 'RECRUITER';
+  }
+
   logout(): void {
     this.auth.logout();
     void this.router.navigate(['/login']);

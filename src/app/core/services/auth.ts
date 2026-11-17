@@ -25,7 +25,7 @@ export class Auth {
     this.hasAccessToken()
   );
 
-  // 1. LOGIN - Username / Password
+  // 1. Login bằng Username/Password
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(
@@ -33,17 +33,13 @@ export class Auth {
         request
       )
       .pipe(
-        tap(response => {
-          this.saveSession(response);
-        })
+        tap(response => this.saveSession(response))
       );
   }
 
-  // 2. GOOGLE LOGIN
+  // 2. Google Login
   googleLogin(idToken: string): Observable<LoginResponse> {
-    const request: GoogleLoginRequest = {
-      idToken
-    };
+    const request: GoogleLoginRequest = { idToken };
 
     return this.http
       .post<LoginResponse>(
@@ -51,13 +47,11 @@ export class Auth {
         request
       )
       .pipe(
-        tap(response => {
-          this.saveSession(response);
-        })
+        tap(response => this.saveSession(response))
       );
   }
 
-  // 3. REGISTER - SCRUM-119
+  // 3. Register
   register(
     request: RegisterRequest
   ): Observable<RegisterResponse> {
@@ -67,7 +61,7 @@ export class Auth {
     );
   }
 
-  // 4. CHANGE PASSWORD - SCRUM-135
+  // 4. Change Password
   changePassword(
     request: ChangePasswordRequest
   ): Observable<void> {
@@ -77,10 +71,8 @@ export class Auth {
     );
   }
 
-  // 5. SAVE SESSION
+  // 5. Lưu phiên đăng nhập
   private saveSession(response: LoginResponse): void {
-    this.setAccessToken(response.accessToken);
-
     localStorage.setItem(
       this.userKey,
       JSON.stringify({
@@ -89,9 +81,11 @@ export class Auth {
         role: response.role
       })
     );
+
+    this.setAccessToken(response.accessToken);
   }
 
-  // 6. TOKEN MANAGEMENT
+  // 6. Quản lý Access Token
   setAccessToken(token: string): void {
     localStorage.setItem(this.accessTokenKey, token);
     this.isAuthenticated.set(true);
@@ -105,13 +99,41 @@ export class Auth {
     return !!this.getAccessToken();
   }
 
-  // 7. LOGOUT
+  // 7. Đọc Role của người dùng
+  // SCRUM-154: Dùng cho giao diện và Role Guard
+  getCurrentRole(): string | null {
+    try {
+      const storedUser = localStorage.getItem(this.userKey);
+
+      if (!storedUser) {
+        return null;
+      }
+
+      const user: unknown = JSON.parse(storedUser);
+
+      if (
+        typeof user === 'object' &&
+        user !== null &&
+        'role' in user &&
+        typeof user.role === 'string'
+      ) {
+        return user.role;
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 8. Xóa phiên đăng nhập
   clearSession(): void {
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.userKey);
     this.isAuthenticated.set(false);
   }
 
+  // 9. Logout
   logout(): void {
     this.clearSession();
   }
