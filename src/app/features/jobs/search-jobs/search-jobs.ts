@@ -1,5 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Auth } from '../../../core/services/auth';
+
 import {
   Component,
   DestroyRef,
@@ -29,6 +31,9 @@ import {
 export class SearchJobs {
   private readonly jobService = inject(JobService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly auth = inject(Auth);
+
   private activeRequest?: Subscription;
 
   readonly loading = signal(false);

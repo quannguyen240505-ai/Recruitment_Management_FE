@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { signal } from '@angular/core';
+import { Auth } from '../../../core/services/auth';
 
 import {
   JobService,
@@ -16,6 +18,11 @@ describe('SearchJobs - SCRUM-144', () => {
   let fixture: ComponentFixture<SearchJobs>;
 
   const searchJobsMock = vi.fn();
+  const authState = signal(false);
+
+  const logoutMock = vi.fn(() => {
+    authState.set(false);
+  });
 
   const mockResponse: SearchJobsResponse = {
     items: [
@@ -40,17 +47,27 @@ describe('SearchJobs - SCRUM-144', () => {
   };
 
   beforeEach(async () => {
+    authState.set(false);
+    logoutMock.mockClear();
     searchJobsMock.mockReset();
     searchJobsMock.mockReturnValue(of(mockResponse));
 
     await TestBed.configureTestingModule({
       imports: [SearchJobs],
+
       providers: [
         provideRouter([]),
         {
           provide: JobService,
           useValue: {
             searchJobs: searchJobsMock
+          }
+        },
+        {
+          provide: Auth,
+          useValue: {
+            isAuthenticated: authState,
+            logout: logoutMock
           }
         }
       ]
@@ -224,5 +241,62 @@ describe('SearchJobs - SCRUM-144', () => {
     expect(searchJobsMock).toHaveBeenCalledTimes(
       previousCalls
     );
+  });
+
+  it('Guest should see Login link', () => {
+    authState.set(false);
+    fixture.detectChanges();
+
+    const loginLink = fixture.nativeElement.querySelector(
+      '.site-header a[href="/login"]'
+    );
+
+    expect(loginLink).not.toBeNull();
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '.site-header button.auth-action'
+      )
+    ).toBeNull();
+  });
+
+  it('Authenticated user should see Logout button', () => {
+    authState.set(true);
+    fixture.detectChanges();
+
+    const logoutButton = fixture.nativeElement.querySelector(
+      '.site-header button.auth-action'
+    );
+
+    expect(logoutButton).not.toBeNull();
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '.site-header a[href="/login"]'
+      )
+    ).toBeNull();
+  });
+
+  it('Logout should return header to Guest state', () => {
+    authState.set(true);
+    fixture.detectChanges();
+
+    const logoutButton = fixture.nativeElement.querySelector(
+      '.site-header button.auth-action'
+    ) as HTMLButtonElement;
+
+    expect(logoutButton).not.toBeNull();
+
+    logoutButton.click();
+    fixture.detectChanges();
+
+    expect(logoutMock).toHaveBeenCalledTimes(1);
+    expect(authState()).toBe(false);
+
+    expect(
+      fixture.nativeElement.querySelector(
+        '.site-header a[href="/login"]'
+      )
+    ).not.toBeNull();
   });
 });
