@@ -16,10 +16,15 @@ select {
     font: inherit;
 }
 
+/* =========================
+   HEADER & NAVIGATION
+   ========================= */
+
 .site-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
     padding: 18px max(24px, calc((100vw - 1200px) / 2));
     background: #fff;
     border-bottom: 1px solid #e2e8f0;
@@ -45,6 +50,10 @@ select {
     font-weight: 700;
 }
 
+.brand-icon {
+    flex-shrink: 0;
+}
+
 .brand strong,
 .brand small {
     display: block;
@@ -56,11 +65,36 @@ select {
     font-size: 11px;
 }
 
-.login-link,
-.text-button {
+/* Login, Dashboard, Logout */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.login-link {
     color: #2563eb;
     text-decoration: none;
     font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.login-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.login-link:focus-visible,
+.brand:focus-visible,
+.text-button:focus-visible,
+.auth-action:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 4px;
+    border-radius: 4px;
 }
 
 .auth-action {
@@ -70,12 +104,9 @@ select {
     cursor: pointer;
 }
 
-
-.text-button {
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-}
+/* =========================
+   MAIN CONTENT
+   ========================= */
 
 .content {
     max-width: 1200px;
@@ -111,6 +142,10 @@ select {
     gap: 24px;
     align-items: start;
 }
+
+/* =========================
+   FILTERS
+   ========================= */
 
 .filter-card,
 .job-card,
@@ -167,6 +202,15 @@ h2 {
     border-color: #2563eb;
 }
 
+.text-button {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 13px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
 .primary-button {
     border: 0;
     border-radius: 9px;
@@ -178,8 +222,21 @@ h2 {
     cursor: pointer;
 }
 
+.primary-button:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
 .primary-button:disabled {
-    opacity: .6;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* =========================
+   SEARCH RESULTS
+   ========================= */
+
+.results {
+    min-width: 0;
 }
 
 .results-header {
@@ -201,7 +258,7 @@ h2 {
 
 .refresh-button:disabled,
 .pagination-buttons button:disabled {
-    opacity: .45;
+    opacity: 0.45;
     cursor: not-allowed;
 }
 
@@ -289,6 +346,14 @@ h2 {
     font-weight: 700;
 }
 
+.detail-link:hover {
+    background: #1d4ed8;
+}
+
+/* =========================
+   LOADING, ERROR, EMPTY
+   ========================= */
+
 .state {
     display: flex;
     align-items: center;
@@ -327,7 +392,7 @@ h2 {
     border: 3px solid #dbeafe;
     border-top-color: #2563eb;
     border-radius: 50%;
-    animation: spin .7s linear infinite;
+    animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
@@ -335,6 +400,10 @@ h2 {
         transform: rotate(360deg);
     }
 }
+
+/* =========================
+   PAGINATION
+   ========================= */
 
 .pagination {
     display: flex;
@@ -354,6 +423,10 @@ h2 {
     gap: 9px;
 }
 
+/* =========================
+   RESPONSIVE
+   ========================= */
+
 @media (max-width: 800px) {
     .layout {
         grid-template-columns: 1fr;
@@ -361,12 +434,32 @@ h2 {
 }
 
 @media (max-width: 520px) {
+    .site-header {
+        padding: 14px 15px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .brand-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-actions {
+        gap: 12px;
+    }
+
     .content {
         padding: 25px 15px 50px;
     }
 
     .hero h1 {
         font-size: 25px;
+    }
+
+    .filter-card,
+    .job-card {
+        padding: 18px;
     }
 
     .job-bottom {
@@ -376,5 +469,9 @@ h2 {
 
     .detail-link {
         text-align: center;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
     }
 }
