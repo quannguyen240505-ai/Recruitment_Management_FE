@@ -1,5 +1,6 @@
 <div class="search-page">
     <header class="site-header">
+        <!-- Logo Recruitly -->
         <a routerLink="/jobs/search" class="brand">
             <span class="brand-icon">R</span>
             <span>
@@ -8,19 +9,26 @@
             </span>
         </a>
 
-        @if (auth.isAuthenticated()) {
-        <button type="button" class="login-link auth-action" (click)="auth.logout()">
-            Đăng xuất
-        </button>
-        } @else {
-        <a routerLink="/login" class="login-link">
-            Đăng nhập
-        </a>
-        }
+        <!-- SCRUM-155: Điều hướng theo phiên đăng nhập -->
+        <nav class="header-actions" aria-label="Điều hướng tài khoản">
+            @if (auth.isAuthenticated()) {
+            <a routerLink="/dashboard" class="login-link">
+                Dashboard
+            </a>
 
+            <button type="button" class="login-link auth-action" (click)="auth.logout()">
+                Đăng xuất
+            </button>
+            } @else {
+            <a routerLink="/login" class="login-link">
+                Đăng nhập
+            </a>
+            }
+        </nav>
     </header>
 
     <main class="content">
+        <!-- Giới thiệu -->
         <section class="hero">
             <p class="eyebrow">FIND YOUR NEXT OPPORTUNITY</p>
             <h1>Tìm kiếm việc làm phù hợp</h1>
@@ -28,9 +36,11 @@
         </section>
 
         <div class="layout">
+            <!-- Bộ lọc tìm kiếm -->
             <aside class="filter-card">
                 <div class="section-heading">
                     <h2>Bộ lọc tìm kiếm</h2>
+
                     <button type="button" class="text-button" (click)="clearFilters()">
                         Xóa lọc
                     </button>
@@ -57,7 +67,9 @@
                     <label for="experience">Kinh nghiệm</label>
                     <input id="experience" name="experience" placeholder="Ví dụ: 1" [(ngModel)]="filters.experience" />
 
-                    <label for="salaryMin">Mức lương tối thiểu (VNĐ)</label>
+                    <label for="salaryMin">
+                        Mức lương tối thiểu (VNĐ)
+                    </label>
                     <input id="salaryMin" name="salaryMin" type="number" min="0" placeholder="Ví dụ: 10000000"
                         [(ngModel)]="filters.salaryMin" />
 
@@ -67,44 +79,56 @@
                 </form>
             </aside>
 
+            <!-- Kết quả tìm kiếm -->
             <section class="results" aria-label="Kết quả tìm kiếm">
                 <div class="results-header">
                     <div>
                         <h2>Việc làm đang tuyển</h2>
+
                         @if (!loading() && !error()) {
                         <p>Tìm thấy {{ totalItems() }} công việc</p>
                         }
                     </div>
+
                     <button type="button" class="refresh-button" (click)="loadJobs()" [disabled]="loading()">
                         Làm mới
                     </button>
                 </div>
 
+                <!-- Đang tải -->
                 @if (loading()) {
                 <div class="state" role="status">
                     <div class="spinner"></div>
                     <h3>Đang tìm kiếm công việc...</h3>
                     <p>Hệ thống đang tải dữ liệu tuyển dụng.</p>
                 </div>
+
                 } @else if (error()) {
+                <!-- Lỗi tải dữ liệu -->
                 <div class="state" role="alert">
                     <div class="state-icon">!</div>
                     <h3>Không thể tải dữ liệu</h3>
                     <p>{{ error() }}</p>
-                    <button class="primary-button" (click)="loadJobs()">
+
+                    <button type="button" class="primary-button" (click)="loadJobs()">
                         Thử lại
                     </button>
                 </div>
+
                 } @else if (jobs().length === 0) {
+                <!-- Không có kết quả -->
                 <div class="state">
                     <div class="state-icon">⌕</div>
                     <h3>Không tìm thấy công việc phù hợp</h3>
                     <p>Hãy thử thay đổi từ khóa hoặc bộ lọc.</p>
-                    <button class="primary-button" (click)="clearFilters()">
+
+                    <button type="button" class="primary-button" (click)="clearFilters()">
                         Xóa bộ lọc
                     </button>
                 </div>
+
                 } @else {
+                <!-- Danh sách công việc -->
                 <div class="job-list">
                     @for (job of jobs(); track job.jobId) {
                     <article class="job-card">
@@ -112,12 +136,14 @@
                             <div class="company-icon">
                                 {{ job.companyName.charAt(0) }}
                             </div>
+
                             <div class="job-info">
                                 <h3>
                                     <a [routerLink]="['/jobs', job.jobId]">
                                         {{ job.title }}
                                     </a>
                                 </h3>
+
                                 <p>{{ job.companyName }}</p>
                             </div>
                         </div>
@@ -133,11 +159,13 @@
                                 <strong>
                                     {{ formatSalary(job.salaryMin, job.salaryMax) }}
                                 </strong>
+
                                 <p>
                                     Hạn nộp:
                                     {{ job.deadline | date:'dd/MM/yyyy' }}
                                 </p>
                             </div>
+
                             <a class="detail-link" [routerLink]="['/jobs', job.jobId]">
                                 Xem chi tiết
                             </a>
@@ -146,14 +174,17 @@
                     }
                 </div>
 
+                <!-- Phân trang -->
                 <div class="pagination">
                     <p>
                         Trang {{ page() + 1 }} / {{ totalPages() }}
                     </p>
+
                     <div class="pagination-buttons">
                         <button type="button" [disabled]="page() === 0 || loading()" (click)="goToPage(page() - 1)">
                             Trước
                         </button>
+
                         <button type="button" [disabled]="page() + 1 >= totalPages() || loading()"
                             (click)="goToPage(page() + 1)">
                             Tiếp
