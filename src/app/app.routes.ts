@@ -17,7 +17,20 @@ export const routes: Routes = [
       import('./features/auth/register/register')
         .then(m => m.Register)
   },
-
+  // SCRUM-158: Forgot Password
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password')
+        .then(m => m.ForgotPassword)
+  },
+  // SCRUM-158: Reset Password
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password')
+        .then(m => m.ResetPassword)
+  },
   {
     path: 'change-password',
     canActivate: [authGuard],

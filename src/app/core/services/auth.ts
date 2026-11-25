@@ -9,7 +9,10 @@ import {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
-  ChangePasswordRequest
+  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest
 } from '../models/auth.models';
 
 @Injectable({
@@ -67,6 +70,25 @@ export class Auth {
   ): Observable<void> {
     return this.http.put<void>(
       `${environment.apiUrl}/auth/change-password`,
+      request
+    );
+  }
+  // SCRUM-158: Forgot Password
+  forgotPassword(
+    request: ForgotPasswordRequest
+  ): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(
+      `${environment.apiUrl}/auth/forgot-password`,
+      request
+    );
+  }
+
+  // SCRUM-158: Reset Password
+  resetPassword(
+    request: ResetPasswordRequest
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/auth/reset-password`,
       request
     );
   }

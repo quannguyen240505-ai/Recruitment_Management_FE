@@ -40,3 +40,18 @@ export interface ChangePasswordRequest {
     newPassword: string;
     confirmPassword: string;
 }
+// SCRUM-158: Forgot Password
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+}
+
+// SCRUM-158: Reset Password
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
