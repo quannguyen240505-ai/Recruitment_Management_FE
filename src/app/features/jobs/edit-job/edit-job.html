@@ -1,0 +1,110 @@
+<div class="recruiter-shell">
+  <aside class="sidebar">
+    <a routerLink="/dashboard" class="brand">RMS <span>/ Recruiter</span></a>
+    <div class="sidebar-caption">HỆ THỐNG TUYỂN DỤNG</div>
+    <nav class="sidebar-nav" aria-label="Menu nhà tuyển dụng">
+      <a routerLink="/dashboard" class="nav-item">Tổng quan</a>
+      <a routerLink="/recruiter/jobs" class="nav-item active" aria-current="page">Tin tuyển dụng</a>
+      <span class="nav-item nav-unavailable">Ứng viên</span>
+    </nav>
+    <div class="sidebar-account"><strong>Tài khoản Recruiter</strong><span>Recruitment Management</span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span>Workspace / Job Edit</span><div class="avatar" aria-label="Recruiter">R</div></header>
+    <main class="main-content">
+      <a class="back-link" routerLink="/recruiter/jobs">← Quay lại tin tuyển dụng</a>
+      <h1>Chỉnh sửa tin tuyển dụng</h1>
+      <p class="subtitle">Chỉ nhà tuyển dụng tạo Job mới được thay đổi thông tin.</p>
+      @if (loading()) {
+        <div class="notice" role="status">Đang tải dữ liệu Job...</div>
+      } @else if (loadError()) {
+        <div class="notice notice-error" role="alert">{{ loadError() }}</div>
+        <button type="button" class="btn btn-outline retry-button" (click)="load()">Thử tải lại</button>
+      } @else if (job()) {
+        @if (!canEdit()) {
+          <div class="notice notice-error" role="alert">Tin tuyển dụng đã đóng hoặc hết hạn. Không thể lưu thay đổi.</div>
+        }
+        <div class="content-grid">
+          <section class="form-card" aria-labelledby="edit-form-title">
+            <h2 id="edit-form-title">Thông tin công việc</h2>
+            <p class="job-meta">ID: {{ jobId }} · Trạng thái: {{ job()!.status }}</p>
+            <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+              <fieldset class="edit-fieldset" [disabled]="saving() || !canEdit()">
+                <div class="form-grid">
+                  <div class="field full-width">
+                    <label for="edit-title">Chức danh công việc <span class="required">*</span></label>
+                    <input id="edit-title" type="text" formControlName="title" [class.field-invalid]="invalid('title')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-category">Category ID <span class="required">*</span></label>
+                    <input id="edit-category" type="text" formControlName="categoryId" [class.field-invalid]="invalid('categoryId')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-type">Loại công việc <span class="required">*</span></label>
+                    <select id="edit-type" formControlName="jobType" [class.field-invalid]="invalid('jobType')">
+                      <option value="">Chọn loại công việc</option>
+                      @for (type of jobTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="edit-location">Địa điểm <span class="required">*</span></label>
+                    <input id="edit-location" type="text" formControlName="location" [class.field-invalid]="invalid('location')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-experience">Kinh nghiệm <span class="required">*</span></label>
+                    <input id="edit-experience" type="text" formControlName="experience" [class.field-invalid]="invalid('experience')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-salary-min">Lương tối thiểu (VNĐ)</label>
+                    <input id="edit-salary-min" type="number" min="0" formControlName="salaryMin" [class.field-invalid]="invalid('salaryMin')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-salary-max">Lương tối đa (VNĐ)</label>
+                    <input id="edit-salary-max" type="number" min="0" formControlName="salaryMax" [class.field-invalid]="invalid('salaryMax')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-positions">Số lượng tuyển <span class="required">*</span></label>
+                    <input id="edit-positions" type="number" min="1" step="1" formControlName="numberOfPositions" [class.field-invalid]="invalid('numberOfPositions')" />
+                  </div>
+                  <div class="field">
+                    <label for="edit-deadline">Hạn nộp <span class="required">*</span></label>
+                    <input id="edit-deadline" type="date" [min]="minDeadline" formControlName="deadline" [class.field-invalid]="invalid('deadline')" />
+                  </div>
+                  <div class="field full-width">
+                    <label for="edit-skills">Skill IDs <span class="required">*</span></label>
+                    <input id="edit-skills" type="text" formControlName="skillIdsText" placeholder="SK-CSHARP, SK-JAVA" [class.field-invalid]="invalid('skillIdsText')" />
+                    <small>Nhập ID kỹ năng có thật, phân cách bằng dấu phẩy.</small>
+                  </div>
+                  <div class="field full-width">
+                    <label for="edit-description">Mô tả <span class="required">*</span></label>
+                    <textarea id="edit-description" rows="5" formControlName="description" [class.field-invalid]="invalid('description')"></textarea>
+                  </div>
+                  <div class="field full-width">
+                    <label for="edit-requirements">Yêu cầu <span class="required">*</span></label>
+                    <textarea id="edit-requirements" rows="5" formControlName="requirements" [class.field-invalid]="invalid('requirements')"></textarea>
+                  </div>
+                </div>
+              </fieldset>
+              @if (errorMessage()) { <div role="alert" class="notice notice-error">{{ errorMessage() }}</div> }
+              <div class="form-actions">
+                <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="cancel()">Hủy</button>
+                <button type="submit" class="btn btn-primary" [disabled]="saving() || !canEdit()">
+                  {{ saving() ? 'Đang lưu...' : 'Lưu thay đổi' }}
+                </button>
+              </div>
+            </form>
+          </section>
+          <aside class="tips-card">
+            <h2>Lưu ý</h2>
+            <ul>
+              <li>Chỉ sửa Job do chính mày đăng.</li>
+              <li>Job đã đóng hoặc hết hạn không được sửa.</li>
+              <li>Không thay đổi quyền sở hữu hoặc trạng thái Job.</li>
+              <li>Kiểm tra lương và ngày hết hạn trước khi lưu.</li>
+            </ul>
+          </aside>
+        </div>
+      }
+    </main>
+  </div>
+</div>

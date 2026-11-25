@@ -1,0 +1,4 @@
+.edit-fieldset { margin: 0; padding: 0; min-width: 0; border: 0; }
+.edit-fieldset:disabled { opacity: .72; }
+.job-meta { font-size: 12px; color: #64748b; margin: -12px 0 22px; overflow-wrap: anywhere; }
+.retry-button { margin-top: 14px; }

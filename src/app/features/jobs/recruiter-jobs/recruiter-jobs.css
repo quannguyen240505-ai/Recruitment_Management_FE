@@ -383,3 +383,53 @@ h1 {
         font-size: 25px;
     }
 }
+
+/* SCRUM-190: Fix action links spacing */
+th.action-column,
+td.action-column {
+    min-width: 200px;
+    white-space: nowrap;
+    text-align: right;
+}
+
+td.action-column a {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+td.action-column a+a {
+    margin-left: 16px;
+}
+
+.edit-link {
+    display: inline-block;
+    margin: 6px 0 0 12px;
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.edit-link:hover {
+    text-decoration: underline;
+}
+
+/* SCRUM-190: Action buttons */
+.action-column {
+    min-width: 200px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.action-column a+a {
+    margin-left: 16px;
+}
+
+.edit-link {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.edit-link:hover {
+    text-decoration: underline;
+}

@@ -180,6 +180,12 @@
                                     Không khả dụng
                                 </span>
                                 }
+                                <!-- SCRUM-190: Edit Job action -->
+                                @if (canEdit(job)) {
+                                <a [routerLink]="['/recruiter/jobs', job.jobId, 'edit']" class="edit-link">
+                                    Chỉnh sửa
+                                </a>
+                                }
                             </td>
                         </tr>
 
