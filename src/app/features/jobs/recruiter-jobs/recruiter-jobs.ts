@@ -1,3 +1,4 @@
+
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -20,6 +21,7 @@ import {
 import {
   JobService,
   JobStatus,
+  RecruiterJobSummary,
   RecruiterJobsResponse
 } from '../../../core/services/job';
 
@@ -48,9 +50,7 @@ export class RecruiterJobs {
   readonly currentPage = signal(1);
   readonly pageSize = 10;
 
-  readonly result = signal<RecruiterJobsResponse | null>(
-    null
-  );
+  readonly result = signal<RecruiterJobsResponse | null>(null);
 
   readonly jobs = computed(
     () => this.result()?.items ?? []
@@ -79,13 +79,18 @@ export class RecruiterJobs {
     );
   });
 
+  // SCRUM-194 - Close Job UI state
+  readonly selectedJob = signal<RecruiterJobSummary | null>(null);
+  readonly closing = signal(false);
+  readonly closeError = signal('');
+  readonly closeSuccess = signal('');
+
   constructor() {
     this.loadJobs();
   }
 
   // 1. LOAD JOBS FROM BACKEND
   loadJobs(): void {
-    // Cancel an older request when filters or page change.
     this.activeRequest?.unsubscribe();
 
     this.loading.set(true);
@@ -145,6 +150,7 @@ export class RecruiterJobs {
 
     this.selectedStatus.set(status);
     this.currentPage.set(1);
+    this.closeSuccess.set('');
 
     this.loadJobs();
   }
@@ -161,11 +167,14 @@ export class RecruiterJobs {
     }
 
     this.currentPage.set(page);
+    this.closeSuccess.set('');
+
     this.loadJobs();
   }
 
   // 4. REFRESH
   refresh(): void {
+    this.closeSuccess.set('');
     this.loadJobs();
   }
 
@@ -184,5 +193,105 @@ export class RecruiterJobs {
       default:
         return status;
     }
+  }
+
+  // 6. SCRUM-194 - OPEN CLOSE CONFIRMATION
+  openCloseModal(job: RecruiterJobSummary): void {
+    if (job.status !== 'OPEN' || this.closing()) {
+      return;
+    }
+
+    this.selectedJob.set(job);
+    this.closeError.set('');
+    this.closeSuccess.set('');
+  }
+
+  // 7. SCRUM-194 - CANCEL CLOSE JOB
+  cancelClose(): void {
+    if (this.closing()) {
+      return;
+    }
+
+    this.selectedJob.set(null);
+    this.closeError.set('');
+  }
+
+  // 8. SCRUM-194 - CONFIRM CLOSE JOB
+  confirmClose(): void {
+    const job = this.selectedJob();
+
+    if (!job || job.status !== 'OPEN' || this.closing()) {
+      return;
+    }
+
+    this.closing.set(true);
+    this.closeError.set('');
+    this.closeSuccess.set('');
+
+    this.jobService
+      .closeJob(job.jobId)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.closing.set(false);
+        })
+      )
+      .subscribe({
+        next: response => {
+          if (
+            response.jobId !== job.jobId ||
+            response.status !== 'CLOSED'
+          ) {
+            this.closeError.set(
+              'Phản hồi từ máy chủ không hợp lệ. Vui lòng kiểm tra lại.'
+            );
+            return;
+          }
+
+          this.selectedJob.set(null);
+
+          if (response.alreadyClosed) {
+            this.closeSuccess.set(
+              'Tin tuyển dụng này đã được đóng trước đó.'
+            );
+          } else {
+            this.closeSuccess.set(
+              'Đóng tin tuyển dụng thành công.'
+            );
+          }
+
+          // Reload from Backend to keep filters and
+          // pagination consistent after status changes.
+          this.loadJobs();
+        },
+
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 401) {
+            this.closeError.set(
+              'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+            );
+          } else if (error.status === 403) {
+            this.closeError.set(
+              'Bạn không có quyền đóng tin tuyển dụng này.'
+            );
+          } else if (error.status === 404) {
+            this.closeError.set(
+              'Không tìm thấy tin tuyển dụng hoặc bạn không phải người sở hữu.'
+            );
+          } else if (error.status === 409) {
+            this.closeError.set(
+              'Trạng thái tin tuyển dụng không cho phép đóng.'
+            );
+          } else if (error.status === 0) {
+            this.closeError.set(
+              'Không thể kết nối đến Backend. Vui lòng thử lại.'
+            );
+          } else {
+            this.closeError.set(
+              'Đóng tin tuyển dụng thất bại. Vui lòng thử lại.'
+            );
+          }
+        }
+      });
   }
 }

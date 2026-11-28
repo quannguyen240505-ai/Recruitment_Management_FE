@@ -17,7 +17,6 @@
 
     <main class="page-content">
 
-        <!-- Page heading -->
         <section class="page-heading">
             <div>
                 <p class="eyebrow">RECRUITER DASHBOARD</p>
@@ -32,7 +31,13 @@
             </a>
         </section>
 
-        <!-- Main jobs card -->
+        <!-- SCRUM-194: Success notification -->
+        @if (closeSuccess()) {
+        <div class="close-success-message" role="status" aria-live="polite">
+            {{ closeSuccess() }}
+        </div>
+        }
+
         <section class="jobs-card">
 
             <div class="card-heading">
@@ -77,19 +82,18 @@
 
             </div>
 
-            <!-- Loading state -->
+            <!-- Loading -->
             @if (loading()) {
 
             <div class="state-container" role="status">
                 <div class="spinner" aria-hidden="true"></div>
-
                 <h3>Đang tải dữ liệu...</h3>
                 <p>Vui lòng chờ trong khi tải tin tuyển dụng.</p>
             </div>
 
             } @else if (error()) {
 
-            <!-- Error state -->
+            <!-- Error -->
             <div class="state-container" role="alert">
                 <div class="state-icon error-icon">!</div>
 
@@ -170,16 +174,30 @@
                                 {{ job.deadline | date:'dd/MM/yyyy' }}
                             </td>
 
+                            <!-- SCRUM-194: Close Job action -->
                             <td class="action-column">
-                                @if (job.status === 'OPEN') {
-                                <a [routerLink]="['/jobs', job.jobId]" class="detail-link">
-                                    Xem chi tiết
-                                </a>
-                                } @else {
-                                <span class="unavailable-link">
-                                    Không khả dụng
-                                </span>
-                                }
+                                <div class="job-actions">
+
+                                    @if (job.status === 'OPEN') {
+
+                                    <a [routerLink]="['/jobs', job.jobId]" class="detail-link">
+                                        Xem chi tiết
+                                    </a>
+
+                                    <button type="button" class="close-job-button" [disabled]="closing()"
+                                        (click)="openCloseModal(job)">
+                                        Đóng tin
+                                    </button>
+
+                                    } @else {
+
+                                    <span class="unavailable-link">
+                                        Không khả dụng
+                                    </span>
+
+                                    }
+
+                                </div>
                             </td>
                         </tr>
 
@@ -224,5 +242,62 @@
     <footer class="page-footer">
         © 2026 Recruitly. All rights reserved.
     </footer>
+
+    <!-- SCRUM-194: Confirmation modal -->
+    @if (selectedJob(); as jobToClose) {
+
+    <div class="close-modal-backdrop">
+
+        <section class="close-modal" role="dialog" aria-modal="true" aria-labelledby="close-modal-title"
+            aria-describedby="close-modal-description">
+
+            <div class="close-modal-icon" aria-hidden="true">
+                !
+            </div>
+
+            <h2 id="close-modal-title">
+                Xác nhận đóng tin tuyển dụng
+            </h2>
+
+            <p id="close-modal-description">
+                Bạn có chắc chắn muốn đóng tin tuyển dụng
+                <strong>{{ jobToClose.title }}</strong>?
+            </p>
+
+            <p class="close-modal-note">
+                Tin tuyển dụng sau khi đóng sẽ không còn
+                nhận đơn ứng tuyển mới.
+            </p>
+
+            <!-- API error notification -->
+            @if (closeError()) {
+            <div class="close-error-message" role="alert">
+                {{ closeError() }}
+            </div>
+            }
+
+            <div class="close-modal-actions">
+
+                <button type="button" class="close-cancel-button" [disabled]="closing()" (click)="cancelClose()">
+                    Hủy
+                </button>
+
+                <button type="button" class="close-confirm-button" [disabled]="closing()" (click)="confirmClose()">
+
+                    @if (closing()) {
+                    Đang đóng...
+                    } @else {
+                    Xác nhận đóng
+                    }
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    }
 
 </div>

@@ -254,4 +254,97 @@ describe('JobService - SCRUM-138, SCRUM-141 & SCRUM-144', () => {
     req.flush({ title: 'Invalid search parameters' }, { status: 400, statusText: 'Bad Request' });
     expect(receivedStatus).toBe(400);
   });
+
+  // ============================================
+  // SCRUM-194 - CLOSE JOB API TESTS
+  // ============================================
+
+  // TEST 1: PATCH Close Job successfully
+  it('should PATCH close job and return CLOSED status', () => {
+    const jobId = 'job-001';
+
+    let result:
+      | {
+        jobId: string;
+        status: string;
+        alreadyClosed: boolean;
+      }
+      | undefined;
+
+    service.closeJob(jobId).subscribe(response => {
+      result = response;
+    });
+
+    const req = http.expectOne(
+      request =>
+        request.method === 'PATCH' &&
+        request.url ===
+        `${environment.apiUrl}/recruiter/jobs/${jobId}/close`
+    );
+
+    expect(req.request.body).toBeNull();
+
+    req.flush({
+      jobId,
+      status: 'CLOSED',
+      alreadyClosed: false
+    });
+
+    expect(result).toEqual({
+      jobId,
+      status: 'CLOSED',
+      alreadyClosed: false
+    });
+  });
+
+  // TEST 2: Already closed job
+  it('should handle an already closed job', () => {
+    let alreadyClosed = false;
+
+    service.closeJob('job-002').subscribe(response => {
+      alreadyClosed = response.alreadyClosed;
+    });
+
+    const req = http.expectOne(
+      `${environment.apiUrl}/recruiter/jobs/job-002/close`
+    );
+
+    expect(req.request.method).toBe('PATCH');
+
+    req.flush({
+      jobId: 'job-002',
+      status: 'CLOSED',
+      alreadyClosed: true
+    });
+
+    expect(alreadyClosed).toBe(true);
+  });
+
+  // TEST 3: API rejects Close Job
+  it('should propagate HTTP 409 when job cannot be closed', () => {
+    let errorStatus = 0;
+
+    service.closeJob('job-003').subscribe({
+      error: (error: HttpErrorResponse) => {
+        errorStatus = error.status;
+      }
+    });
+
+    const req = http.expectOne(
+      `${environment.apiUrl}/recruiter/jobs/job-003/close`
+    );
+
+    expect(req.request.method).toBe('PATCH');
+
+    req.flush(
+      { detail: 'Job cannot be closed' },
+      {
+        status: 409,
+        statusText: 'Conflict'
+      }
+    );
+
+    expect(errorStatus).toBe(409);
+  });
+
 });
