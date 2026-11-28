@@ -44,6 +44,15 @@ export const routes: Routes = [
         .then(m => m.CreateJob)
   },
 
+  // SCRUM-190: Recruiter Edit Job
+  {
+    path: 'recruiter/jobs/:jobId/edit',
+    canActivate: [roleGuard],
+    loadComponent: () =>
+      import('./features/jobs/edit-job/edit-job')
+        .then(m => m.EditJob)
+  },
+
   // SCRUM-154: Recruiter - Manage Jobs
   {
     path: 'recruiter/jobs',

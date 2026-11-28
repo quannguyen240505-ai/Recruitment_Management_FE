@@ -170,6 +170,11 @@ export class RecruiterJobs {
   }
 
   // 5. DISPLAY STATUS IN VIETNAMESE
+  canEdit(job: { status: JobStatus; deadline: string }): boolean {
+    const todayUtc = new Date().toISOString().slice(0, 10);
+    return job.status !== 'CLOSED' && job.deadline.slice(0, 10) > todayUtc;
+  }
+
   getStatusLabel(status: string): string {
     switch (status) {
       case 'OPEN':

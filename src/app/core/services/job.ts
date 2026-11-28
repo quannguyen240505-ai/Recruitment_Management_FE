@@ -67,6 +67,12 @@ export interface JobDetailResponse {
   }[];
 }
 
+// SCRUM-190 - Edit Job
+export type UpdateJobRequest = CreateJobRequest;
+export interface RecruiterJobEditDetail extends JobDetailResponse {
+  categoryId: string;
+}
+
 // SCRUM-141 - Recruiter Jobs List
 export interface RecruiterJobSummary {
   jobId: string;
@@ -167,6 +173,20 @@ export class JobService {
       { params }
     );
   }
+  // SCRUM-190 - Recruiter-owner detail (GET) and Update Job (PUT).
+  getRecruiterJobDetail(jobId: string): Observable<RecruiterJobEditDetail> {
+    return this.http.get<RecruiterJobEditDetail>(
+      `${environment.apiUrl}/recruiter/jobs/${encodeURIComponent(jobId)}`
+    );
+  }
+
+  updateJob(jobId: string, body: UpdateJobRequest): Observable<CreateJobResponse> {
+    return this.http.put<CreateJobResponse>(
+      `${environment.apiUrl}/recruiter/jobs/${encodeURIComponent(jobId)}`,
+      body
+    );
+  }
+
   // SCRUM-144 - GET /api/Jobs (public search, zero-based pagination)
   searchJobs(filters: SearchJobsFilters = {}): Observable<SearchJobsResponse> {
     let params = new HttpParams()
