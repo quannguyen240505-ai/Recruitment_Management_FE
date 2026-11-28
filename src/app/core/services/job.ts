@@ -84,6 +84,12 @@ export interface RecruiterJobsResponse {
   pageSize: number;
   totalPages: number;
 }
+// SCRUM-194 - Close Job API Response
+export interface CloseJobResponse {
+  jobId: string;
+  status: 'CLOSED';
+  alreadyClosed: boolean;
+}
 
 // SCRUM-144 - Public Search Jobs
 export interface SearchJobsFilters {
@@ -167,6 +173,15 @@ export class JobService {
       { params }
     );
   }
+
+  // SCRUM-194 - Close Job
+  closeJob(jobId: string): Observable<CloseJobResponse> {
+    return this.http.patch<CloseJobResponse>(
+      `${environment.apiUrl}/recruiter/jobs/${encodeURIComponent(jobId)}/close`,
+      null
+    );
+  }
+
   // SCRUM-144 - GET /api/Jobs (public search, zero-based pagination)
   searchJobs(filters: SearchJobsFilters = {}): Observable<SearchJobsResponse> {
     let params = new HttpParams()

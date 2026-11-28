@@ -5,6 +5,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  CloseJobResponse,
   JobService,
   RecruiterJobsResponse
 } from '../../../core/services/job';
@@ -16,6 +17,7 @@ describe('RecruiterJobs - SCRUM-141', () => {
   let fixture: ComponentFixture<RecruiterJobs>;
 
   const getRecruiterJobs = vi.fn();
+  const closeJob = vi.fn();
 
   function mockResponse(): RecruiterJobsResponse {
     return {
@@ -40,6 +42,16 @@ describe('RecruiterJobs - SCRUM-141', () => {
     getRecruiterJobs.mockReset();
     getRecruiterJobs.mockReturnValue(of(mockResponse()));
 
+    closeJob.mockReset();
+
+    closeJob.mockReturnValue(
+      of({
+        jobId: 'job-001',
+        status: 'CLOSED',
+        alreadyClosed: false
+      })
+    );
+
     await TestBed.configureTestingModule({
       imports: [RecruiterJobs],
       providers: [
@@ -47,7 +59,8 @@ describe('RecruiterJobs - SCRUM-141', () => {
         {
           provide: JobService,
           useValue: {
-            getRecruiterJobs
+            getRecruiterJobs,
+            closeJob
           }
         }
       ]
@@ -188,4 +201,250 @@ describe('RecruiterJobs - SCRUM-141', () => {
 
     expect(component.jobs().length).toBe(1);
   });
+
+  // ============================================
+  // SCRUM-194 - CLOSE JOB UI TESTS
+  // ============================================
+
+  // TEST 9: Close button only for OPEN jobs
+  it('should show Close button only for OPEN jobs', () => {
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelectorAll('.close-job-button').length
+    ).toBe(1);
+
+    component.result.set({
+      ...mockResponse(),
+      items: [
+        {
+          ...mockResponse().items[0],
+          status: 'CLOSED'
+        }
+      ]
+    });
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.close-job-button')
+    ).toBeNull();
+  });
+
+  // TEST 10: Open confirmation modal
+  it('should open confirmation modal before closing a job', () => {
+    const button: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.close-job-button');
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(component.selectedJob()?.jobId).toBe('job-001');
+
+    expect(
+      fixture.nativeElement.querySelector('[role="dialog"]')
+    ).not.toBeNull();
+
+    expect(closeJob).not.toHaveBeenCalled();
+  });
+
+  // TEST 11: Cancel without calling API
+  it('should cancel Close Job without calling API', () => {
+    component.openCloseModal(component.jobs()[0]);
+    fixture.detectChanges();
+
+    const cancelButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.close-cancel-button');
+
+    cancelButton.click();
+    fixture.detectChanges();
+
+    expect(component.selectedJob()).toBeNull();
+    expect(closeJob).not.toHaveBeenCalled();
+
+    expect(component.jobs()[0].status).toBe('OPEN');
+
+    expect(
+      fixture.nativeElement.querySelector('[role="dialog"]')
+    ).toBeNull();
+  });
+
+  // TEST 12: Successful confirmation
+  it('should close job and update UI to CLOSED', () => {
+    const closedJobs: RecruiterJobsResponse = {
+      ...mockResponse(),
+      items: [
+        {
+          ...mockResponse().items[0],
+          status: 'CLOSED'
+        }
+      ]
+    };
+
+    // Response used when the component reloads the list.
+    getRecruiterJobs.mockReturnValueOnce(of(closedJobs));
+
+    component.openCloseModal(component.jobs()[0]);
+    fixture.detectChanges();
+
+    const confirmButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.close-confirm-button');
+
+    confirmButton.click();
+    fixture.detectChanges();
+
+    expect(closeJob).toHaveBeenCalledTimes(1);
+    expect(closeJob).toHaveBeenCalledWith('job-001');
+
+    expect(getRecruiterJobs).toHaveBeenCalledTimes(2);
+
+    expect(component.jobs()[0].status).toBe('CLOSED');
+    expect(component.selectedJob()).toBeNull();
+
+    expect(component.closeSuccess()).toContain('thành công');
+
+    expect(
+      fixture.nativeElement.querySelector('.close-job-button')
+    ).toBeNull();
+  });
+
+  // TEST 13: Already closed response
+  it('should handle alreadyClosed response', () => {
+    closeJob.mockReturnValue(
+      of({
+        jobId: 'job-001',
+        status: 'CLOSED',
+        alreadyClosed: true
+      })
+    );
+
+    component.openCloseModal(component.jobs()[0]);
+    component.confirmClose();
+
+    expect(closeJob).toHaveBeenCalledTimes(1);
+    expect(component.closeSuccess()).toContain(
+      'đã được đóng trước đó'
+    );
+    expect(component.selectedJob()).toBeNull();
+  });
+
+  // TEST 14: Prevent duplicate submissions
+  it('should prevent duplicate Close Job requests', () => {
+    const pending = new Subject<CloseJobResponse>();
+
+    closeJob.mockReturnValue(pending.asObservable());
+
+    component.openCloseModal(component.jobs()[0]);
+
+    component.confirmClose();
+    component.confirmClose();
+
+    expect(closeJob).toHaveBeenCalledTimes(1);
+    expect(component.closing()).toBe(true);
+
+    // Cannot dismiss while request is processing.
+    component.cancelClose();
+    expect(component.selectedJob()).not.toBeNull();
+
+    pending.next({
+      jobId: 'job-001',
+      status: 'CLOSED',
+      alreadyClosed: false
+    });
+    pending.complete();
+
+    expect(component.closing()).toBe(false);
+    expect(component.selectedJob()).toBeNull();
+  });
+
+  // TEST 15: Prevent closing non-OPEN jobs
+  it('should reject Close Job for CLOSED or PAUSED jobs', () => {
+    for (const status of ['CLOSED', 'PAUSED'] as const) {
+      component.openCloseModal({
+        ...mockResponse().items[0],
+        status
+      });
+
+      expect(component.selectedJob()).toBeNull();
+    }
+
+    component.confirmClose();
+
+    expect(closeJob).not.toHaveBeenCalled();
+  });
+
+  // TEST 16-21: Handle API errors
+  it.each([
+    {
+      status: 401,
+      message: 'Phiên đăng nhập đã hết hạn'
+    },
+    {
+      status: 403,
+      message: 'không có quyền đóng'
+    },
+    {
+      status: 404,
+      message: 'Không tìm thấy tin tuyển dụng'
+    },
+    {
+      status: 409,
+      message: 'không cho phép đóng'
+    },
+    {
+      status: 0,
+      message: 'Không thể kết nối'
+    },
+    {
+      status: 500,
+      message: 'Đóng tin tuyển dụng thất bại'
+    }
+  ])(
+    'should handle Close Job HTTP $status without false success',
+    ({ status, message }) => {
+      closeJob.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status }))
+      );
+
+      component.openCloseModal(component.jobs()[0]);
+      component.confirmClose();
+      fixture.detectChanges();
+
+      expect(closeJob).toHaveBeenCalledTimes(1);
+
+      expect(component.closeError()).toContain(message);
+      expect(component.closeSuccess()).toBe('');
+
+      // Keep the current job unchanged on failure.
+      expect(component.jobs()[0].status).toBe('OPEN');
+      expect(component.selectedJob()).not.toBeNull();
+
+      expect(
+        fixture.nativeElement.querySelector('.close-error-message')
+      ).not.toBeNull();
+    }
+  );
+
+  // TEST 22: Reject invalid server response
+  it('should not show success for invalid API response', () => {
+    closeJob.mockReturnValue(
+      of({
+        jobId: 'unexpected-job-id',
+        status: 'CLOSED',
+        alreadyClosed: false
+      })
+    );
+
+    component.openCloseModal(component.jobs()[0]);
+    component.confirmClose();
+
+    expect(component.closeError()).toContain(
+      'Phản hồi từ máy chủ không hợp lệ'
+    );
+
+    expect(component.closeSuccess()).toBe('');
+    expect(component.selectedJob()).not.toBeNull();
+    expect(component.jobs()[0].status).toBe('OPEN');
+  });
+
 });
